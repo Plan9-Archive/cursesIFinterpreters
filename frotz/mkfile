@@ -1,0 +1,8 @@
+all:
+   pcc -c src/common/*.c
+   pcc -c src/dumb/*.c
+   pcc -v *.8
+
+clean:
+   rm *.out
+   rm *.8
