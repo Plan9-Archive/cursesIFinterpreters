@@ -20,4 +20,4 @@ mk
 cd $builddir
 cp frotz/cfrotz /386/bin/cfrotz
 cp glulxe/cglulxe /386/bin/cglulxe
-cp hugo/source/hugo /386/bin/hugo
+cp hugo/source/hugo /386/bin/chugo
