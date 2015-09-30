@@ -318,7 +318,12 @@ void p9putc(int y, int x, chtype ch)
 	{
 		p1 = p0;
 		p1.x += runestringnwidth(font, buf, 1);
+/* ANNOYING - the next line chokes hugo so its commented out, but this probably messes up underline support in everything
+
 		line(screen, p0, p1, Enddisc, Enddisc, 0, colors[fg], ZP);
+
+ * so this should be figured out and fixed
+*/
 	}
 }
 

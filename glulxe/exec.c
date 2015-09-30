@@ -715,14 +715,7 @@ restart:
         break;
 
       case op_quit:
-//		printf(" QUIT ");
-//        done_executing = TRUE;
-        leave_function();
-        if (stackptr == 0) {
-          done_executing = TRUE;
-          break;
-        }
-        pop_callstub(inst[0].value);
+        done_executing = TRUE;
         break;
 
       case op_linearsearch:

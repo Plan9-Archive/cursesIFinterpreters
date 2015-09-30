@@ -1,0 +1,23 @@
+#!/bin/rc
+
+builddir=`{pwd}
+dircp syscurses /sys
+cd /sys/src/ape/lib/curses
+mk install
+cd $builddir
+cd frotz
+mk
+cd $builddir
+cd glkterm
+mk
+cp libglkterm.a /386/lib/ape
+cd $builddir
+cd glulxe
+mk
+cd $builddir
+cd hugo/source
+mk
+cd $builddir
+cp frotz/cfrotz /386/bin/cfrotz
+cp glulxe/cglulxe /386/bin/cglulxe
+cp hugo/source/hugo /386/bin/hugo
