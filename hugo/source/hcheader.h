@@ -16,6 +16,7 @@
 #define HCINTERIM ".03 (2.5)"
 #endif
 
+#define	toascii(c)	((c)&0177)
 
 #include <ctype.h>
 #include <stdlib.h>

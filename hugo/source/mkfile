@@ -1,0 +1,10 @@
+all:
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c he*.c
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c stringfn.c
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -o hugo he.8 heexpr.8 hemisc.8 heobject.8 heparse.8 herun.8 heres.8 heset.8 stringfn.8 hegcc.8
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c hc*.c
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -o hugocompiler hc.8 hcbuild.8 hccode.8 hcdef.8 hcfile.8 hclink.8 hcmisc.8 hccomp.8 hcpass.8 hcres.8 stringfn.8 hcgcc.8
+clean:
+	rm *.8
+	rm hugo
+	rm hugocompiler
