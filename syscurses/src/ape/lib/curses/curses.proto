@@ -1,0 +1,16 @@
+# APE Libs - Curses
+386	- sys sys
+	lib	- sys sys
+		ape	- sys sys
+			libcurses.a	- sys sys
+sys	- sys sys
+	include	- sys sys
+		ape	- sys sys
+			curses.h	- sys sys
+			panel.h	- sys sys
+			term.h	- sys sys
+	src	- sys sys
+		ape	- sys sys
+			lib	- sys sys
+				curses	- sys sys
+					+ 	- sys sys
