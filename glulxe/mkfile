@@ -1,7 +1,8 @@
+</sys/src/ape/config
 all:
-	8a getfcr.s
+	$Oa getfcr.s
 	pcc -I../glkterm -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c *.c
-	pcc -I../glkterm -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -o cglulxe main.8 files.8 vm.8 exec.8 funcs.8 operand.8 string.8 glkop.8 heap.8 serial.8 search.8 accel.8 float.8 gestalt.8 osdepend.8 profile.8 unixstrt.8 getfcr.8 -lglkterm
+	pcc -I../glkterm -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -o cglulxe main.$O files.$O vm.$O exec.$O funcs.$O operand.$O string.$O glkop.$O heap.$O serial.$O search.$O accel.$O float.$O gestalt.$O osdepend.$O profile.$O unixstrt.$O getfcr.$O -lglkterm
 clean:
-	rm *.8
+	rm *.$O
 	rm glulxe

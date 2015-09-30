@@ -1,7 +1,8 @@
+</sys/src/ape/config
 all:
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -DCOLOR_SUPPORT -c src/curses/*.c
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -DCOLOR_SUPPORT -c src/common/*.c
-	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -DCOLOR_SUPPORT -o cfrotz *.8
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -DCOLOR_SUPPORT -o cfrotz *.$O
 clean:
    rm *.out
-   rm *.8
+   rm *.$O
