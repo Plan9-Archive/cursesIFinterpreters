@@ -1,0 +1,7 @@
+all:
+	8a getfcr.s
+	pcc -I../glkterm -c *.c
+	pcc -I../glkterm -o glulxe main.8 files.8 vm.8 exec.8 funcs.8 operand.8 string.8 glkop.8 heap.8 serial.8 search.8 accel.8 float.8 gestalt.8 osdepend.8 profile.8 unixstrt.8 getfcr.8 -lglkterm
+clean:
+	rm *.8
+	rm glulxe

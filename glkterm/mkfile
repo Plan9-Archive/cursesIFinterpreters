@@ -1,0 +1,9 @@
+all:
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c cgunicod.c
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c cgunicod.c
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c g*.c
+	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c main.c
+	ar r libglkterm.a main.8 gtevent.8 gtfref.8 gtgestal.8 gtinput.8 gtmessag.8 gtmessin.8 gtmisc.8 gtstream.8 gtstyle.8 gtw_blnk.8 gtw_buf.8 gtw_grid.8 gtw_pair.8 gtwindow.8 gtschan.8 gtblorb.8 cgunicod.8 cgdate.8 gi_dispa.8 gi_blorb.8
+clean:
+	rm *.a
+	rm *.8
