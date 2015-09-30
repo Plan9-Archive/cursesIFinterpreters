@@ -250,6 +250,7 @@ int p9eget(void)
 			raise(SIGINT);
 		return transk(e.kbdc);
 	}
+	return;
 }
 
 void p9init(void)
