@@ -4,5 +4,6 @@ played which don't work right with frotz-dumb or cheapglk.
 
 As of the time of this upload (9/29/2015), building these successfully
 in 9front also requires latest updates to fix bugs in cmd/cpp and
-ape's libdraw.  binaries are availables at
-files.9gridchan.org/fictools
+ape's libdraw. Precompiled binaries for x86 are availables at:
+
+http://files.9gridchan.org/fictools

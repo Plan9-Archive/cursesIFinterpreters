@@ -6,18 +6,14 @@ cd /sys/src/ape/lib/curses
 mk install
 cd $builddir
 cd frotz
-mk
+mk install
 cd $builddir
 cd glkterm
-mk
-cp libglkterm.a /386/lib/ape
+mk install
 cd $builddir
 cd glulxe
-mk
+mk install
 cd $builddir
 cd hugo/source
-mk
+mk install
 cd $builddir
-cp frotz/cfrotz /386/bin/cfrotz
-cp glulxe/cglulxe /386/bin/cglulxe
-cp hugo/source/hugo /386/bin/chugo
