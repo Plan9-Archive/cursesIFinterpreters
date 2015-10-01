@@ -5,6 +5,10 @@ all:
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -o hugo he.$O heexpr.$O hemisc.$O heobject.$O heparse.$O herun.$O heres.$O heset.$O stringfn.$O hegcc.$O
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c hc*.c
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -o hugocompiler hc.$O hcbuild.$O hccode.$O hcdef.$O hcfile.$O hclink.$O hcmisc.$O hccomp.$O hcpass.$O hcres.$O stringfn.$O hcgcc.$O
+install:
+	mk
+	cp hugo /$objtype/bin/chugo
+	cp hugocompiler /$objtype/bin
 clean:
 	rm *.$O
 	rm hugo

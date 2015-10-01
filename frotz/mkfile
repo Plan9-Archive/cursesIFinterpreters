@@ -3,6 +3,9 @@ all:
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -DCOLOR_SUPPORT -c src/curses/*.c
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -DCOLOR_SUPPORT -c src/common/*.c
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -DCOLOR_SUPPORT -o cfrotz *.$O
+install:
+	mk
+	cp cfrotz /$objtype/bin
 clean:
    rm *.out
    rm *.$O

@@ -5,6 +5,9 @@ all:
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c g*.c
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c main.c
 	ar r libglkterm.a main.$O gtevent.$O gtfref.$O gtgestal.$O gtinput.$O gtmessag.$O gtmessin.$O gtmisc.$O gtstream.$O gtstyle.$O gtw_blnk.$O gtw_buf.$O gtw_grid.$O gtw_pair.$O gtwindow.$O gtschan.$O gtblorb.$O cgunicod.$O cgdate.$O gi_dispa.$O gi_blorb.$O
+install:
+	mk
+	cp libglkterm.a /$objtype/lib/ape
 clean:
 	rm *.a
 	rm *.$O
