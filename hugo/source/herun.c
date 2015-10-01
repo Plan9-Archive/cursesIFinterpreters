@@ -38,8 +38,8 @@ long tail_recursion_addr = 0;
 
 /* Used by RunWindow() for setting current window dimensions: */
 int last_window_top, last_window_bottom, last_window_left, last_window_right;
-int lowest_windowbottom = 0,			/* in text lines */
-	physical_lowest_windowbottom;		/* in pixels or text lines */
+int lowest_windowbottom = 0,			/* in text hugolines */
+	physical_lowest_windowbottom;		/* in pixels or text hugolines */
 char just_left_window = false;
 	
 /* from heparse.c, for RunEvents() */
@@ -175,7 +175,7 @@ void RunGame(void)
 #endif
 
 	/* Set up initial screen position */
-	hugo_settextpos(1, physical_windowheight/lineheight);
+	hugo_settextpos(1, physical_windowheight/hugolineheight);
 	display_needs_repaint = false;
 	full = 0;
 
@@ -299,7 +299,7 @@ FreshInput:
 						var[actor] = var[player];
 #if defined (DEBUGGER)
 						AddStringtoCodeWindow("[Waiting for input]");
-						buffered_code_lines = FORCE_REDRAW;
+						buffered_code_hugolines = FORCE_REDRAW;
 						debugger_has_stepped_back = false;
 						window[VIEW_LOCALS].changed = true;
 #endif
@@ -326,7 +326,7 @@ FreshInput:
 */
 								while (buffer[strlen(buffer)-1]==0x0d || buffer[strlen(buffer)-1]==0x0a)
 									buffer[strlen(buffer)-1] = '\0';
-								sprintf(line, "\n%s%s", GetWord(var[prompt]), buffer);
+								sprintf(hugoline, "\n%s%s", GetWord(var[prompt]), buffer);
 								if (script)
 									/* fprintf() this way for Glk */
 									if (fprintf(script, "%s", "\n")<0)
@@ -334,7 +334,7 @@ FreshInput:
 #if defined (SCROLLBACK_DEFINED)
 								hugo_sendtoscrollback("\n");
 #endif
-								AP(line);
+								AP(hugoline);
 							}
 						}
 #if defined (DEBUGGER)
@@ -354,7 +354,7 @@ FreshInput:
 									/* fprintf() this way for Glk */
 									if (fprintf(record, "%s", "\n")<0)
 										FatalError(WRITE_E);
-									if (i==words) goto RecordedNewline;
+									if (i==words) goto RecordedNewhugoline;
 								}
 								else if (fputs(word[i], record)<0
 									|| fprintf(record, "%s", " ")<0)
@@ -363,7 +363,7 @@ FreshInput:
 								}
 							}
 							if (fprintf(record, "%s", "\n")<0) FatalError(WRITE_E);
-RecordedNewline:;
+RecordedNewhugoline:;
 						}
 					}
 					else full_buffer = false;
@@ -580,8 +580,8 @@ NextPerform:
 								*/
 								if (objcount > 1)
 								{
-									sprintf(line, "%s:  \\;", Name(var[object]));
-									AP(line);
+									sprintf(hugoline, "%s:  \\;", Name(var[object]));
+									AP(hugoline);
 								}
 
 								obj_match_state = 0;
@@ -754,11 +754,11 @@ NormalTermination:
 	window[VIEW_CALLS].count = 0;
 
 	for (i=0; i<(int)window[CODE_WINDOW].count; i++)
-		free(codeline[i]);
+		free(codehugoline[i]);
 	window[CODE_WINDOW].count = 0;
 
 	/* Force Code window redraw */
-	buffered_code_lines = FORCE_REDRAW;
+	buffered_code_hugolines = FORCE_REDRAW;
 
 	goto RestartDebugger;
 #endif
@@ -866,7 +866,7 @@ void RunInput(void)
 
 	if (icolor==-1) icolor = fcolor;	/* check unset input color */
 
-	hugo_getline("");
+	hugo_gethugoline("");
 
 #if defined (DEBUGGER)
 	if (debugger_collapsing) return;
@@ -976,7 +976,7 @@ void RunPrint(void)
 
 	while (MEM(codeptr) != EOL_T)
 	{
-		strcpy(line, "");
+		strcpy(hugoline, "");
 
 		switch (MEM(codeptr))
 		{
@@ -1005,7 +1005,7 @@ void RunPrint(void)
 					a = (int)(ACTUAL_LINELENGTH() / ratio);
 				}
 #endif
-				strcpy(line, "");
+				strcpy(hugoline, "");
 				l = 0;
 				if (a*FIXEDCHARWIDTH >
 					hugo_textwidth(pbuffer)+currentpos-hugo_charwidth(' '))
@@ -1018,8 +1018,8 @@ void RunPrint(void)
 #endif
 						i+=hugo_charwidth(' '))
 					{
-						line[l++] = FORCED_SPACE;
-						line[l] = '\0';
+						hugoline[l++] = FORCED_SPACE;
+						hugoline[l] = '\0';
 					}
 
 				}
@@ -1056,8 +1056,8 @@ void RunPrint(void)
 				else
 					l = Peek(codeptr);
 				for (i=0; i<l; i++)
-					line[i] = (char)(MEM(++codeptr) - CHAR_TRANSLATION);
-				line[i] = '\0';
+					hugoline[i] = (char)(MEM(++codeptr) - CHAR_TRANSLATION);
+				hugoline[i] = '\0';
 				codeptr++;
 				break;
 			}
@@ -1068,20 +1068,20 @@ void RunPrint(void)
 				a = GetValue();
 				if (!number)
 				{
-					strcpy(line, GetWord(a));
+					strcpy(hugoline, GetWord(a));
 				}
 				else
 				{
 					if (!hexnumber)
 					{
 						if (capital)
-							itoa((unsigned int)a, line, 10);
+							itoa((unsigned int)a, hugoline, 10);
 						else
-							itoa(a, line, 10);
+							itoa(a, hugoline, 10);
 						capital = 0;
 					}
 					else
-						sprintf(line, "%X", a);
+						sprintf(hugoline, "%X", a);
 
 					number = 0;
 					hexnumber = 0;
@@ -1093,13 +1093,13 @@ void RunPrint(void)
 		if (MEM(codeptr)==SEMICOLON_T)
 		{
 			codeptr++;
-			strcat(line, "\\;");
+			strcat(hugoline, "\\;");
 		}
 		if (capital)
 		{
 			capital = 0;
-			if ((unsigned)line[0]<128)
-				line[0] = (char)toupper((int)line[0]);
+			if ((unsigned)hugoline[0]<128)
+				hugoline[0] = (char)toupper((int)hugoline[0]);
 			else
 			{
 				/* Special conversion for non-Latin1
@@ -1107,12 +1107,12 @@ void RunPrint(void)
 				*/
 				char diff;
 				diff = 'a'-'A';
-				if ((unsigned)line[0]+diff<=255 && (unsigned)line[0]-diff>127)
-					line[0] -= diff;
+				if ((unsigned)hugoline[0]+diff<=255 && (unsigned)hugoline[0]-diff>127)
+					hugoline[0] -= diff;
 			}
 		}
 
-		AP(line);
+		AP(hugoline);
 	}
 
 	codeptr++;
@@ -1341,8 +1341,8 @@ int RunRestore()
 #if defined (DEBUGGER)
 	if (debugger_collapsing) return 1;
 #endif
-	if (!strcmp(line, "")) return 0;
-	if (!(save = HUGO_FOPEN(line, "r+b"))) return 0;
+	if (!strcmp(hugoline, "")) return 0;
+	if (!(save = HUGO_FOPEN(hugoline, "r+b"))) return 0;
 
 #else
 	/* Glk implementation */
@@ -1365,7 +1365,7 @@ int RunRestore()
 	save = NULL;
 
 #if !defined (GLK)
-	strcpy(savefile, line);
+	strcpy(savefile, hugoline);
 #endif
 
 	game_reset = true;
@@ -1382,8 +1382,8 @@ RestoreError:
 
 /* RUNROUTINE
 
-	This is the main loop for running each line of code in sequence;
-	the main switch statement is based on the first token in each line.
+	This is the main loop for running each hugoline of code in sequence;
+	the main switch statement is based on the first token in each hugoline.
 
 	This routine is relatively complex, especially given the addition
 	of debugger control.  Basically it is structured like this:
@@ -1452,8 +1452,8 @@ void RunRoutine(long addr)
 	{
 		if (codeptr != addr)
 		{
-			sprintf(line, "[ROUTINE:  $%6s]", PrintHex(addr));
-			AP(line);
+			sprintf(hugoline, "[ROUTINE:  $%6s]", PrintHex(addr));
+			AP(hugoline);
 			wascalled = 1;
 		}
 	}
@@ -1492,17 +1492,17 @@ void RunRoutine(long addr)
 		}
 		else
 		{
-			/* Add a blank line if one hasn't been added
+			/* Add a blank hugoline if one hasn't been added
 			   already:
 			*/
-			if ((window[CODE_WINDOW].count) && (codeline[window[CODE_WINDOW].count-1][0]&0x0FF)!='\0')
+			if ((window[CODE_WINDOW].count) && (codehugoline[window[CODE_WINDOW].count-1][0]&0x0FF)!='\0')
 				AddStringtoCodeWindow("");
 
-			/* If this is a property routine, the debug_line array
+			/* If this is a property routine, the debug_hugoline array
 			   already holds the calling information
 			*/
 			if (!trace_complex_prop_routine)
-				sprintf(debug_line, "Calling:  %s", RoutineName(currentroutine));
+				sprintf(debug_hugoline, "Calling:  %s", RoutineName(currentroutine));
 			else
 				trace_comp_prop = true;
 			trace_complex_prop_routine = false;
@@ -1523,18 +1523,18 @@ void RunRoutine(long addr)
 			}
 
 			/* If not object.property or an event */
-			if (strchr(debug_line, '.')==NULL && strstr(debug_line, "vent ")==NULL)
+			if (strchr(debug_hugoline, '.')==NULL && strstr(debug_hugoline, "vent ")==NULL)
 			{
-				strcat(debug_line, "(");
+				strcat(debug_hugoline, "(");
 				for (i=0; i<arguments_passed; i++)
 				{
-					sprintf(debug_line+strlen(debug_line), "%d", var[MAXGLOBALS+i]);
+					sprintf(debug_hugoline+strlen(debug_hugoline), "%d", var[MAXGLOBALS+i]);
 					if (i<arguments_passed-1)
-						strcat(debug_line, ", ");
+						strcat(debug_hugoline, ", ");
 				}
-				strcat(debug_line, ")");
+				strcat(debug_hugoline, ")");
 			}
-			AddStringtoCodeWindow(debug_line);
+			AddStringtoCodeWindow(debug_hugoline);
 		}
 	}
 
@@ -1585,8 +1585,8 @@ ContinueRunning:
 #if defined (DEBUG_CODE)
 		if (!inwindow)
 		{
-			sprintf(line, "[%6s:  %s]", PrintHex(codeptr), token[t]);
-			AP(line);
+			sprintf(hugoline, "[%6s:  %s]", PrintHex(codeptr), token[t]);
+			AP(hugoline);
 		}
 #endif
 #endif
@@ -1595,9 +1595,9 @@ ContinueRunning:
 #if defined (DEBUGGER)
 		if (++runaway_counter>=65535 && runtime_warnings)
 		{
-			sprintf(debug_line, "Possible runaway loop (65535 unchecked steps)");
-			RuntimeWarning(debug_line);
-			buffered_code_lines = FORCE_REDRAW;
+			sprintf(debug_hugoline, "Possible runaway loop (65535 unchecked steps)");
+			RuntimeWarning(debug_hugoline);
+			buffered_code_hugolines = FORCE_REDRAW;
 			runaway_counter = 0;
 		}
 
@@ -1677,10 +1677,10 @@ ContinueRunning:
 
 
 		/* May be necessary to reset this if, for some
-		   reason, the line array was altered (see above)
+		   reason, the hugoline array was altered (see above)
 		*/
 		if (!trace_complex_prop_routine)
-			sprintf(debug_line, "Calling:  %s", RoutineName(currentroutine));
+			sprintf(debug_hugoline, "Calling:  %s", RoutineName(currentroutine));
 		trace_complex_prop_routine = false;
 
 
@@ -1739,19 +1739,19 @@ ProcessToken:
 					{
 						/* Read the local variable name */
 						for (i=0; i<len; i++)
-							line[i] = MEM(codeptr+i+1);
-						line[len] = '\0';
+							hugoline[i] = MEM(codeptr+i+1);
+						hugoline[len] = '\0';
 
 						/* Check to make sure it doesn't already exist,
 						   for instance, if we've looped back to it
 						*/
 						for (i=0; i<current_locals; i++)
-							if (!strcmp(line, localname[i])) break;
+							if (!strcmp(hugoline, localname[i])) break;
 						
 						/* If it doesn't exist, add it */
 						if (i==current_locals)
 						{
-							strcpy(localname[current_locals], line);
+							strcpy(localname[current_locals], hugoline);
 							if (++current_locals==MAXLOCALS)
 								current_locals--;
 							window[VIEW_LOCALS].count = current_locals;
@@ -1771,15 +1771,15 @@ ProcessToken:
 			case TEXTDATA_T:        /* printed text from file */
 			{
 				textaddr = Peek(codeptr+1)*65536L+(long)PeekWord(codeptr+2);
-				strcpy(line, GetText(textaddr));
+				strcpy(hugoline, GetText(textaddr));
 				codeptr += 4;
 				if (Peek(codeptr)==SEMICOLON_T)
-					{strcat(line, "\\;");
+					{strcat(hugoline, "\\;");
 					codeptr++;}
 				if (capital)
-					{line[0] = (char)toupper((int)line[0]);
+					{hugoline[0] = (char)toupper((int)hugoline[0]);
 					capital = 0;}
-				AP(line);
+				AP(hugoline);
 				break;
 			}
 
@@ -1828,10 +1828,10 @@ ProcessToken:
 Printcharloop:
 				codeptr++;
 				i = GetValue();
-				if (capital) sprintf(line, "%c\\;", toupper(i));
-				else sprintf(line, "%c\\;", i);
+				if (capital) sprintf(hugoline, "%c\\;", toupper(i));
+				else sprintf(hugoline, "%c\\;", i);
 				capital = 0;
-				AP(line);
+				AP(hugoline);
 				if (Peek(codeptr)==COMMA_T)
 					goto Printcharloop;
 				if (game_version>=23) codeptr++; /* eol */
@@ -1864,17 +1864,17 @@ Printcharloop:
 					ypos = GetValue();
 				}
 				else
-					ypos = currentline;
+					ypos = currenthugoline;
 
 				full = ypos - 1;
 
 
-				if (ypos >= physical_windowheight/lineheight)
+				if (ypos >= physical_windowheight/hugolineheight)
 					full = 0;
 					
-				if (ypos > physical_windowheight/lineheight)
+				if (ypos > physical_windowheight/hugolineheight)
 				{
-					ypos = physical_windowheight/lineheight;
+					ypos = physical_windowheight/hugolineheight;
 
 					if (!inwindow && current_text_y && (currentfont & PROP_FONT))
 						adhere_to_bottom = true;
@@ -1882,12 +1882,12 @@ Printcharloop:
 
 				hugo_settextpos(xpos, ypos);
 
-				/* An adjustment for non-fixed-width font lineheight */
+				/* An adjustment for non-fixed-width font hugolineheight */
 				if (adhere_to_bottom)
-					current_text_y = physical_windowbottom - lineheight;
+					current_text_y = physical_windowbottom - hugolineheight;
 
 				currentpos = (xpos-1)*FIXEDCHARWIDTH;
-				currentline = ypos;
+				currenthugoline = ypos;
 
 				codeptr++;      /* skip EOL */
 				break;
@@ -2130,7 +2130,7 @@ LeaveBreak:
 				hugo_settextcolor(fcolor);
 				hugo_setbackcolor(bgcolor);
 				hugo_clearwindow();
-				hugo_settextpos(1, physical_windowheight/lineheight); /*+1);*/
+				hugo_settextpos(1, physical_windowheight/hugolineheight); /*+1);*/
 
 				if (!inwindow)
 				{
@@ -2285,22 +2285,22 @@ LeaveRunRoutine:
 		else if (!debugger_step_over)
 		{
 ReturnfromRoutine:
-			sprintf(debug_line, "(Returning %d", ret);
+			sprintf(debug_hugoline, "(Returning %d", ret);
 
 			/* Since a complex property routine will give "<Routine>" as the
 			   routine name, skip those
 			*/
 			called_from = RoutineName(currentroutine);
 			if (!trace_comp_prop && called_from[0]!='<')
-				sprintf(debug_line+strlen(debug_line), " from %s", called_from);
+				sprintf(debug_hugoline+strlen(debug_hugoline), " from %s", called_from);
 
 			if (old_currentroutine!=mainaddr && old_currentroutine!=initaddr
 				&& currentroutine!=mainaddr && currentroutine!=initaddr)
 			{
-				sprintf(debug_line+strlen(debug_line), " to %s", RoutineName(old_currentroutine));
+				sprintf(debug_hugoline+strlen(debug_hugoline), " to %s", RoutineName(old_currentroutine));
 			}
-			strcat(debug_line, ")");
-			AddStringtoCodeWindow(debug_line);
+			strcat(debug_hugoline, ")");
+			AddStringtoCodeWindow(debug_hugoline);
 			AddStringtoCodeWindow("");
 
 			if ((signed)--window[VIEW_CALLS].count < 0)
@@ -2313,8 +2313,8 @@ ReturnfromRoutine:
 
 /*#elif defined (DEBUG_CODE)
 	if (wascalled)
-		{sprintf(line, "[RETURNING %d]", ret);
-		AP(line);}
+		{sprintf(hugoline, "[RETURNING %d]", ret);
+		AP(hugoline);}
 */
 #endif
 
@@ -2427,10 +2427,10 @@ int RunSave()
 #if defined (DEBUGGER)
 	if (debugger_collapsing) return 1;
 #endif
-	if (!strcmp(line, gamefile)) return 0;
-	if (!strcmp(line, "")) return 0;
-	if (!hugo_overwrite(line)) return 0;
-	if (!(save = HUGO_FOPEN(line, "w+b"))) return 0;
+	if (!strcmp(hugoline, gamefile)) return 0;
+	if (!strcmp(hugoline, "")) return 0;
+	if (!hugo_overwrite(hugoline)) return 0;
+	if (!(save = HUGO_FOPEN(hugoline, "w+b"))) return 0;
 
 #else
 	/* Glk implementation */
@@ -2453,7 +2453,7 @@ int RunSave()
 	save = NULL;
 
 #if !defined (GLK)
-	strcpy(savefile, line);
+	strcpy(savefile, hugoline);
 #endif
 
 	return(1);
@@ -2483,11 +2483,11 @@ int RunScriptSet()
 #if defined (DEBUGGER)
 				if (debugger_collapsing) return 1;
 #endif
-				if (!strcmp(line, "")) return 0;
-				if (!hugo_overwrite(line)) return 0;
-				if (!(script = HUGO_FOPEN(line, "wt")))
+				if (!strcmp(hugoline, "")) return 0;
+				if (!hugo_overwrite(hugoline)) return 0;
+				if (!(script = HUGO_FOPEN(hugoline, "wt")))
 					return (0);
-				strcpy(scriptfile, line);
+				strcpy(scriptfile, hugoline);
 
 #else
 				/* Glk implementation */
@@ -2560,19 +2560,19 @@ int RunString()
 		maxlen = GetValue();
 	if (Peek(codeptr)==CLOSE_BRACKET_T) codeptr++;
 
-	strcpy(line, GetWord(dword));
+	strcpy(hugoline, GetWord(dword));
 
 	defseg = arraytable;
 	pos = 0;
-	for (i=0; i<(int)strlen(line) && i<(int)maxlen; i++, pos++)
+	for (i=0; i<(int)strlen(hugoline) && i<(int)maxlen; i++, pos++)
 	{
 		char a;
 
 		SaveUndo(ARRAYDATA_T, aaddr, i, PeekWord(aaddr+i*2), 0);
 
-		a = line[i];
+		a = hugoline[i];
 		if (a=='\\')
-			++i, a = SpecialChar(line, &i);
+			++i, a = SpecialChar(hugoline, &i);
 		PokeWord(aaddr+pos*2, a);
 	}
 	PokeWord(aaddr+pos*2, 0);
@@ -2694,8 +2694,8 @@ int RunSystem(void)
 struct SAVED_WINDOW_DATA
 {
 	int left, top, right, bottom;
-	int width, height, charwidth, lineheight;
-	int currentpos, currentline;
+	int width, height, charwidth, hugolineheight;
+	int currentpos, currenthugoline;
 	int currentfont;
 } SAVED_WINDOW_DATA;
 
@@ -2709,9 +2709,9 @@ void SaveWindowData(struct SAVED_WINDOW_DATA *spw)
 	spw->height = physical_windowheight;
 	spw->currentfont = currentfont;
 	spw->charwidth = charwidth;
-	spw->lineheight = lineheight;
+	spw->hugolineheight = hugolineheight;
 	spw->currentpos = currentpos;
-	spw->currentline = currentline;
+	spw->currenthugoline = currenthugoline;
 }
 
 void RestoreWindowData(struct SAVED_WINDOW_DATA *spw)
@@ -2724,9 +2724,9 @@ void RestoreWindowData(struct SAVED_WINDOW_DATA *spw)
 	physical_windowheight = spw->height;
 
 	charwidth = spw->charwidth;
-	lineheight = spw->lineheight;
+	hugolineheight = spw->hugolineheight;
 	currentpos = spw->currentpos;
-	currentline = spw->currentline;
+	currenthugoline = spw->currenthugoline;
 
 /*	if (currentfont!=spw->currentfont) hugo_font((currentfont = spw->currentfont)); */
 }
@@ -2911,7 +2911,7 @@ void RunWindow(void)
 	}
 
 	/* v2.3 and earlier supported a very simple version of
-	   windowing:  mainly just moving the top/scroll-off line
+	   windowing:  mainly just moving the top/scroll-off hugoline
 	   of the printable area to the bottom of the text printed
 	   in the "window" block
 	*/
@@ -2935,7 +2935,7 @@ void RunWindow(void)
 		        SCREENWIDTH/FIXEDCHARWIDTH,
 			SCREENHEIGHT/FIXEDLINEHEIGHT);
 
-		physical_lowest_windowbottom = full*lineheight;
+		physical_lowest_windowbottom = full*hugolineheight;
 	}
 
 LeaveWindow:
@@ -2944,7 +2944,7 @@ LeaveWindow:
 
 #ifndef PALMOS
 	if (!current_text_y)
-		hugo_settextpos(1, physical_windowheight/lineheight);
+		hugo_settextpos(1, physical_windowheight/hugolineheight);
 #endif
 	current_text_x = 0;
 	currentpos = 0;

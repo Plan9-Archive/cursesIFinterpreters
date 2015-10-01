@@ -37,12 +37,12 @@ int current_text_x = 0, current_text_y = 0;
 char fcolor = DEF_FCOLOR, bgcolor = DEF_BGCOLOR;
 char default_bgcolor = DEF_BGCOLOR;
 int SCREENWIDTH, SCREENHEIGHT;
-int charwidth, lineheight;
+int charwidth, hugolineheight;
 int FIXEDCHARWIDTH, FIXEDLINEHEIGHT;
-int currentpos, currentline, currentfont;
+int currentpos, currenthugoline, currentfont;
 int physical_windowtop = 0, physical_windowbottom = 0,
 	physical_windowleft = 0, physical_windowright = 0;
-char line[MAXBUFFER];
+char hugoline[MAXBUFFER];
 char pbuffer[MAXBUFFER*2+1];
 unsigned int textto = 0;
 unsigned int arraytable = 0;
@@ -108,11 +108,11 @@ each of the top corners.");
 	hugo_settextpos(1, 1);
 	full = -1;
 
-	AP("This should display \\Bbold\\b, \\Iitalic\\i, and \\Uunderlined\\u \
-type, wrapping properly onto the next line when it hits the right edge of the \
+	AP("This should display \\Bbold\\b, \\Iitalic\\i, and \\Uunderhugolined\\u \
+type, wrapping properly onto the next hugoline when it hits the right edge of the \
 screen.");
 	AP("\\n\\PThis should (after a double space) print the same thing (i.e. \
-\\Bbold\\b, \\Iitalic\\i, and \\Uunderline\\u), except in proportional type (if \
+\\Bbold\\b, \\Iitalic\\i, and \\Uunderhugoline\\u), except in proportional type (if \
 the system provides it).\\p");
 
 	hugo_waitforkey();
@@ -185,13 +185,13 @@ the system provides it).\\p");
 
 	fcolor = HUGO_BRIGHT_WHITE;
 	bgcolor = HUGO_GREEN;
-	strcpy(line, "");
+	strcpy(hugoline, "");
 	for (i=1; i<=SCREENWIDTH/hugo_charwidth(' '); i++)
-		strcat(line, "\\_");
-	AP(line);
-	strcpy(line, "SPECIAL CHARACTERS AND SCROLLING");
-	hugo_settextpos(physical_windowwidth/FIXEDCHARWIDTH/2-strlen(line)/2, 1);
-	AP(line);
+		strcat(hugoline, "\\_");
+	AP(hugoline);
+	strcpy(hugoline, "SPECIAL CHARACTERS AND SCROLLING");
+	hugo_settextpos(physical_windowwidth/FIXEDCHARWIDTH/2-strlen(hugoline)/2, 1);
+	AP(hugoline);
 	hugo_settextwindow(1, 2,
 		SCREENWIDTH/FIXEDCHARWIDTH, SCREENHEIGHT/FIXEDLINEHEIGHT);
 	SETWINDOWBOTTOM(2);
@@ -231,8 +231,8 @@ the system provides it).\\p");
 	AP("As may or may not have happened by now, every time a page is filled, \
 a \"[MORE...]\" prompt should appear at the bottom of the screen.");
 	AP("\\nThe page should only scroll when \\Iexactly\\i one screen of text \
-has been printed.  That is, the last line of the previous page should disappear \
-before the \"[MORE...]\" prompt appears, and a line of text should never disappear \
+has been printed.  That is, the last hugoline of the previous page should disappear \
+before the \"[MORE...]\" prompt appears, and a hugoline of text should never disappear \
 off the top of the screen without the \"[MORE...]\" prompt.");
 	AP("\\nScrolling should take into account the current window, which in the \
 current case is everything below the title band.  The title \\\\;");
@@ -242,13 +242,13 @@ current case is everything below the title band.  The title \\\\;");
 	fcolor = DEF_FCOLOR;
 	bgcolor = DEF_BGCOLOR;
 	AP(" should remain at the top of the screen.  (That last bit--the printing \
-of the title--should have appeared in white and green in the middle of the line.)");
+of the title--should have appeared in white and green in the middle of the hugoline.)");
 
 	AP("");
 	for (i=1; i<=50; i++)
 	{
-		sprintf(line, "Line %d", i);
-		AP(line);
+		sprintf(hugoline, "Line %d", i);
+		AP(hugoline);
 	}
 
 	hugo_waitforkey();
@@ -266,10 +266,10 @@ of the title--should have appeared in white and green in the middle of the line.
 
 void AP (char *a)
 {
-	char c, sticky = false, skipspchar = false, startofline = 0;
+	char c, sticky = false, skipspchar = false, startofhugoline = 0;
 	int b, i, j, slen;
-	int newline = 0;
-	int thisline, thisword;           /* widths in pixels or characters */
+	int newhugoline = 0;
+	int thishugoline, thisword;           /* widths in pixels or characters */
 	int tempfont;
 
 	char q[MAXBUFFER*2+1],            /* current word      */
@@ -293,13 +293,13 @@ void AP (char *a)
 		sticky = true;
 	}
 
-	thisline = hugo_textwidth(pbuffer);
+	thishugoline = hugo_textwidth(pbuffer);
 
 	slen = strlen(pbuffer);
-	if (slen==0) startofline = true;
+	if (slen==0) startofhugoline = true;
 
 	/* Check for color changes */
-	if (lastfcolor!=fcolor || lastbgcolor!=bgcolor || startofline)
+	if (lastfcolor!=fcolor || lastbgcolor!=bgcolor || startofhugoline)
 	{
 		pbuffer[slen++] = COLOR_CHANGE;
 		pbuffer[slen++] = (char)(fcolor+1);
@@ -310,7 +310,7 @@ void AP (char *a)
 	}
 
 	/* Check for font changes */
-	if (lastfont!=currentfont || startofline)
+	if (lastfont!=currentfont || startofhugoline)
 	{
 		pbuffer[slen++] = FONT_CHANGE;
 		pbuffer[slen++] = (char)(currentfont+1);
@@ -348,7 +348,7 @@ void AP (char *a)
 						if (!textto)
 						{
 							r = '\0';
-							newline = true;
+							newhugoline = true;
 						}
 						else
 							r = '\n';
@@ -418,13 +418,13 @@ AddFontCode:
 				else if (r=='^')
 				{
 					r = '\0';
-					newline++;
+					newhugoline++;
 				}
 			}
 			else if (r=='\n')
 			{
 				r = '\0';
-				newline++;
+				newhugoline++;
 			}
 
 			/* Add the new character */
@@ -468,7 +468,7 @@ GetNextChar:
 	   etc., i.e., something that signals the end of the current word.
 	*/
 		strcat(pbuffer, q);
-		thisline += thisword;
+		thishugoline += thisword;
 
 		if (strlen(pbuffer) >= MAXBUFFER*2) FatalError(OVERFLOW_E);
 
@@ -476,12 +476,12 @@ GetNextChar:
 		/* Check if the current screen position plus the width of the
 		   to-be-printed text exceeds the width of the screen */
 
-		if (thisline+currentpos > physical_windowwidth)
+		if (thishugoline+currentpos > physical_windowwidth)
 		{
 			/* If so, skim backward for a place to break the
-			   line, i.e., a space or a hyphen */
+			   hugoline, i.e., a space or a hyphen */
 
-			thisword = thisline;    /* smaller line length */
+			thisword = thishugoline;    /* smaller hugoline length */
 
 			/* A complicated little loop, mainly that way to enable
 			   breaks on appropriate punctuation, but also to make
@@ -523,7 +523,7 @@ GetNextChar:
 
 			if (q[j]=='-' && q[j+1]=='-') j--;
 
-			/* Print the first part of the line (with the rest
+			/* Print the first part of the hugoline (with the rest
 			   stored in pbuffer
 			*/
 			c = q[j+1];
@@ -538,7 +538,7 @@ GetNextChar:
 			Printout(q);
 			q[j+1] = c;
 
-			/* Make sure that the to-be-printed line starts out
+			/* Make sure that the to-be-printed hugoline starts out
 			   with the right font (i.e., if a font change was
 			   processed by Printout() and is now stored in
 			   currentfont)
@@ -553,16 +553,16 @@ GetNextChar:
 				q+j+1);
 			currentfont = tempfont;
 
-			thisline = hugo_textwidth(pbuffer);
+			thishugoline = hugo_textwidth(pbuffer);
 		}
 
-		if (newline)
+		if (newhugoline)
 		{
 			Printout(pbuffer);
 			strcpy(pbuffer, "");
-			thisline = 0;
+			thishugoline = 0;
 
-			while (--newline) Printout("");
+			while (--newhugoline) Printout("");
 		}
 	}
 
@@ -650,17 +650,17 @@ void Printout(char *a)
 #endif
 	}
 
-	/* If we've got a linefeed and didn't hit the right edge of the
+	/* If we've got a hugolinefeed and didn't hit the right edge of the
 	   window
 	*/
 	if (!sticky && currentpos+l < physical_windowwidth)
 	{
 		/* The background color may have to be temporarily set if we're
-		   not in a window--the reason is that full lines of the
+		   not in a window--the reason is that full hugolines of the
 		   current background color might be printed by the OS-specific
 		   scrolling function.  (This behavior is overridden by the
 		   Hugo engine for in-window printing, which always adds new
-		   lines in the current background color when scrolling.)
+		   hugolines in the current background color when scrolling.)
 		*/
 		hugo_print("\r");
 		hugo_setbackcolor((inwindow)?bgcolor:default_bgcolor);
@@ -668,7 +668,7 @@ void Printout(char *a)
 		i = currentfont;
 		hugo_font(currentfont = last_printed_font);
 
-		if (currentline > physical_windowheight/lineheight)
+		if (currenthugoline > physical_windowheight/hugolineheight)
 		{
 			hugo_scrollwindowup();
 		}
@@ -689,22 +689,22 @@ void Printout(char *a)
 	}
 #endif
 
-	/* If no newline is to be printed after the current line: */
+	/* If no newhugoline is to be printed after the current hugoline: */
 	if (sticky)
 	{
 		currentpos += l;
 	}
 
-	/* Otherwise, take care of all the line-feeding, line-counting,
+	/* Otherwise, take care of all the hugoline-feeding, hugoline-counting,
 	   etc.
 	*/
 	else
 	{
 		currentpos = 0;
-		if (currentline++ > physical_windowheight/lineheight)
-			currentline = physical_windowheight/lineheight;
+		if (currenthugoline++ > physical_windowheight/hugolineheight)
+			currenthugoline = physical_windowheight/hugolineheight;
 
-		if (++full >= physical_windowheight/lineheight-1)
+		if (++full >= physical_windowheight/hugolineheight-1)
 			PromptMore();
 
 		if (script)
@@ -738,7 +738,7 @@ void PromptMore(void)
 	hugo_setbackcolor(17); /* DEF_BGCOLOR); */
 
 	/* +1 to force positioning to the very, very bottom of the window */
-	hugo_settextpos(1, physical_windowheight/lineheight+1);
+	hugo_settextpos(1, physical_windowheight/hugolineheight+1);
 	hugo_print("[MORE...]");
 
 	k = hugo_waitforkey();
@@ -753,11 +753,11 @@ void PromptMore(void)
 	hugo_settextcolor(fcolor);      /* program colors */
 	hugo_setbackcolor(bgcolor);
 
-	hugo_settextpos(1, physical_windowheight/lineheight+1);
+	hugo_settextpos(1, physical_windowheight/hugolineheight+1);
 	hugo_print("         ");
 
 	hugo_font(currentfont = tempcurrentfont);
-	hugo_settextpos(1, physical_windowheight/lineheight);
+	hugo_settextpos(1, physical_windowheight/hugolineheight);
 	current_text_y = temp_current_text_y;
 	full = 0;
 }
@@ -841,16 +841,16 @@ char SpecialChar(char *a, int *i)
 #ifndef NO_LATIN1_CHARSET
 			switch (s)
 			{
-				case 'a':  s = '˝'; break;
-				case 'e':  s = 'À'; break;
-				case 'i':  s = 'œ'; break;
-				case 'o':  s = '⁄'; break;
-				case 'u':  s = 'ò'; break;
-				case 'A':  s = 'ø'; break;
-				case 'E':  s = 'ª'; break;
-				case 'I':  s = '√'; break;
-				case 'O':  s = '≥'; break;
-				case 'U':  s = 'ç'; break;
+				case 'a':  s = 'ÔøΩ'; break;
+				case 'e':  s = 'ÔøΩ'; break;
+				case 'i':  s = 'ÔøΩ'; break;
+				case 'o':  s = 'ÔøΩ'; break;
+				case 'u':  s = 'ÔøΩ'; break;
+				case 'A':  s = 'ÔøΩ'; break;
+				case 'E':  s = 'ÔøΩ'; break;
+				case 'I':  s = 'ÔøΩ'; break;
+				case 'O':  s = 'ÔøΩ'; break;
+				case 'U':  s = 'ÔøΩ'; break;
 			}
 #endif
 			break;
@@ -861,18 +861,18 @@ char SpecialChar(char *a, int *i)
 #ifndef NO_LATIN1_CHARSET
 			switch (s)
 			{
-				case 'a':  s = '∑'; break;
-				case 'e':  s = '»'; break;
-				case 'i':  s = 'Ã'; break;
-				case 'o':  s = '€'; break;
-				case 'u':  s = 'ô'; break;
+				case 'a':  s = 'ÔøΩ'; break;
+				case 'e':  s = 'ÔøΩ'; break;
+				case 'i':  s = 'ÔøΩ'; break;
+				case 'o':  s = 'ÔøΩ'; break;
+				case 'u':  s = 'ÔøΩ'; break;
 				case 'y':  s = (char)0xfd; break;
-				case 'A':  s = '°'; break;
-				case 'E':  s = 'ä'; break;
-				case 'I':  s = '’'; break;
-				case 'O':  s = '≤'; break;
-				case 'U':  s = 'é'; break;
-				case 'Y':  s = ''; break;
+				case 'A':  s = 'ÔøΩ'; break;
+				case 'E':  s = 'ÔøΩ'; break;
+				case 'I':  s = 'ÔøΩ'; break;
+				case 'O':  s = 'ÔøΩ'; break;
+				case 'U':  s = 'ÔøΩ'; break;
+				case 'Y':  s = 'ÔøΩ'; break;
 			}
 #endif
 			break;
@@ -883,12 +883,12 @@ char SpecialChar(char *a, int *i)
 #ifndef NO_LATIN1_CHARSET
 			switch (s)
 			{
-				case 'a':  s = 'ì'; break;
-				case 'n':  s = '“'; break;
-				case 'o':  s = 'û'; break;
-				case 'A':  s = 'à'; break;
-				case 'N':  s = 'ã'; break;
-				case 'O':  s = 'π'; break;
+				case 'a':  s = 'ÔøΩ'; break;
+				case 'n':  s = 'ÔøΩ'; break;
+				case 'o':  s = 'ÔøΩ'; break;
+				case 'A':  s = 'ÔøΩ'; break;
+				case 'N':  s = 'ÔøΩ'; break;
+				case 'O':  s = 'ÔøΩ'; break;
 			}
 #endif
 			break;
@@ -899,16 +899,16 @@ char SpecialChar(char *a, int *i)
 #ifndef NO_LATIN1_CHARSET
 			switch (s)
 			{
-				case 'a':  s = 'í'; break;
-				case 'e':  s = 'Õ'; break;
-				case 'i':  s = '”'; break;
-				case 'o':  s = 'Ÿ'; break;
-				case 'u':  s = 'ö'; break;
-				case 'A':  s = '¨'; break;
-				case 'E':  s = '†'; break;
-				case 'I':  s = 'ë'; break;
-				case 'O':  s = 'å'; break;
-				case 'U':  s = '§'; break;
+				case 'a':  s = 'ÔøΩ'; break;
+				case 'e':  s = 'ÔøΩ'; break;
+				case 'i':  s = 'ÔøΩ'; break;
+				case 'o':  s = 'ÔøΩ'; break;
+				case 'u':  s = 'ÔøΩ'; break;
+				case 'A':  s = 'ÔøΩ'; break;
+				case 'E':  s = 'ÔøΩ'; break;
+				case 'I':  s = 'ÔøΩ'; break;
+				case 'O':  s = 'ÔøΩ'; break;
+				case 'U':  s = 'ÔøΩ'; break;
 			}
 #endif
 			break;
@@ -919,17 +919,17 @@ char SpecialChar(char *a, int *i)
 #ifndef NO_LATIN1_CHARSET
 			switch (s)
 			{
-				case 'a':  s = 'î'; break;
-				case 'e':  s = 'Œ'; break;
-				case 'i':  s = '‘'; break;
-				case 'o':  s = 'ñ'; break;
-				case 'u':  s = '∏'; break;
-				case 'y':  s = 'ù'; break;
-				case 'A':  s = 'ü'; break;
-				case 'E':  s = '¿'; break;
-				case 'I':  s = '¶'; break;
-				case 'O':  s = '˜'; break;
-				case 'U':  s = '–'; break;
+				case 'a':  s = 'ÔøΩ'; break;
+				case 'e':  s = 'ÔøΩ'; break;
+				case 'i':  s = 'ÔøΩ'; break;
+				case 'o':  s = 'ÔøΩ'; break;
+				case 'u':  s = 'ÔøΩ'; break;
+				case 'y':  s = 'ÔøΩ'; break;
+				case 'A':  s = 'ÔøΩ'; break;
+				case 'E':  s = 'ÔøΩ'; break;
+				case 'I':  s = 'ÔøΩ'; break;
+				case 'O':  s = 'ÔøΩ'; break;
+				case 'U':  s = 'ÔøΩ'; break;
 			}
 #endif
 			break;
@@ -940,64 +940,64 @@ char SpecialChar(char *a, int *i)
 #ifndef NO_LATIN1_CHARSET
 			switch (s)
 			{
-				case 'C':  s = '´'; break;
-				case 'c':  s = '¡'; break;
+				case 'C':  s = 'ÔøΩ'; break;
+				case 'c':  s = 'ÔøΩ'; break;
 			}
 #endif
 			break;
 		}
 		case '<':               /* Spanish left quotation marks */
 #ifndef NO_LATIN1_CHARSET
-			s = '¥';
+			s = 'ÔøΩ';
 #endif
 			break;
 		case '>':               /* Spanish right quotation marks */
 #ifndef NO_LATIN1_CHARSET
-			s = '™';
+			s = 'ÔøΩ';
 			break;
 #endif
 		case '!':               /* upside-down exclamation mark */
 #ifndef NO_LATIN1_CHARSET
-			s = '∞';
+			s = 'ÔøΩ';
 #endif
 			break;
 		case '?':               /* upside-down question mark */
 #ifndef NO_LATIN1_CHARSET
-			s = '¯';
+			s = 'ÔøΩ';
 #endif
 			break;
 		case 'a':               /* ae ligature */
 #ifndef NO_LATIN1_CHARSET
-			s = ' '; ++*i;
+			s = 'ÔøΩ'; ++*i;
 #else
 			s = 'e'; ++*i;
 #endif
 			break;
 		case 'A':               /* AE ligature */
 #ifndef NO_LATIN1_CHARSET
-			s = 'ê'; ++*i; 
+			s = 'ÔøΩ'; ++*i; 
 #else
 			s = 'E'; ++*i;
 #endif
 			break;
 		case 'c':               /* cents symbol */
 #ifndef NO_LATIN1_CHARSET
-			s = '¢';
+			s = 'ÔøΩ';
 #endif
 			break;
 		case 'L':               /* British pound */
 #ifndef NO_LATIN1_CHARSET
-			s = '£';
+			s = 'ÔøΩ';
 #endif
 			break;
 		case 'Y':               /* Japanese Yen */
 #ifndef NO_LATIN1_CHARSET
-			s = 'Ä';
+			s = 'ÔøΩ';
 #endif
 			break;
 		case '-':               /* em dash */
 #ifndef NO_LATIN1_CHARSET
-			s = 'Û';
+			s = 'ÔøΩ';
 #endif
 			break;
 		case '#':               /* 3-digit decimal ASCII code */

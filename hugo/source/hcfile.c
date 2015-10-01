@@ -23,7 +23,7 @@
 
 long codeptr = 0;               /* position in object code */
 long textptr = 0;               /* position in text file */
-char buffer[MAXBUFFER];         /* the input line */
+char buffer[MAXBUFFER];         /* the input hugoline */
 int totalfiles = 0;
 
 FILE *sourcefile; char sourcefilename[MAXPATH]; /* original source         */
@@ -56,13 +56,13 @@ void CleanUpFiles(void)
 
 /* GETLINE
 
-	Gets an unprocessed line from sourcefile and separates the words.
-	<offset> is set during subsequent calls by SeparateWords if a line
+	Gets an unprocessed hugoline from sourcefile and separates the words.
+	<offset> is set during subsequent calls by SeparateWords if a hugoline
 	ends inside a string constant.
 */
 
 /* hugo_fgets() is for reading (in binary mode) text files with
-   Unix, DOS, and Mac line-endings
+   Unix, DOS, and Mac hugoline-endings
 */
 char *hugo_fgets(char *string, int count, FILE *file)
 {
@@ -120,8 +120,8 @@ void GetLine(int offset)
 		do
 		{
 GetaNewLine:
-			tlines++;	/* total lines compiled */
-			totallines++;
+			thugolines++;	/* total hugolines compiled */
+			totalhugolines++;
 
 			a = b;
 			if (!hugo_fgets(a, MAXBUFFER*2, sourcefile))
@@ -165,8 +165,8 @@ GetaNewLine:
 						len--;
 					}
 
-					tlines++;
-					totallines++;
+					thugolines++;
+					totalhugolines++;
 
 					if (*a=='!' && *(a+1)=='\\')
 						cnest++;
@@ -203,7 +203,7 @@ GetaNewLine:
 
 /* GETWORDS
 
-	Gets the next line of already-separated words from allfile.
+	Gets the next hugoline of already-separated words from allfile.
 */
 
 void GetWords(void)
@@ -248,23 +248,23 @@ GetNextWords:
 
 	} while (words==0 && !feof(allfile));
 
-	/* Get line number for error reporting--this is so we can locate
-	   the error even when the lines are being read back from the big,
+	/* Get hugoline number for error reporting--this is so we can locate
+	   the error even when the hugolines are being read back from the big,
 	   contiguous allfile.
 	*/
-	if (word[words+1][1]=='!') errline = ReadWord(allfile);
+	if (word[words+1][1]=='!') errhugoline = ReadWord(allfile);
 
 	word[words+1] = "";
 
 /* Uncomment the following for debugging: */
 /*
-	strcpy(line, "");
+	strcpy(hugoline, "");
 	for (bloc=1; bloc<=words; bloc++)
 	{
-		strcat(line, word[bloc]);
-		strcat(line, " ");
+		strcat(hugoline, word[bloc]);
+		strcat(hugoline, " ");
 	}
-	Printout(line);
+	Printout(hugoline);
 */
 }
 
@@ -334,7 +334,7 @@ unsigned int ReadWord(FILE *f)
 /* TRYTOOPEN
 
 	Tries to open a particular filename (based on a given environment
-	variable or command-line directory).
+	variable or command-hugoline directory).
 */
 
 FILE *TrytoOpen(char *f, char *p, char *d)
@@ -349,7 +349,7 @@ FILE *TrytoOpen(char *f, char *p, char *d)
 	/* If the given filename doesn't already specify where to find it */
         if (!strcmp(drive, "") && !strcmp(dir, ""))
 	{
-		/* Check first for a directory in the command line 
+		/* Check first for a directory in the command hugoline 
 		   or source
 		*/
 		for (i=0; i<directoryctr; i++)

@@ -78,9 +78,9 @@ void ConverttoChar(int *i, char *c)
 
 /* HARDCOPY
 
-	Sends the contents of the current window line-by-line
+	Sends the contents of the current window hugoline-by-hugoline
 	to the printer using debug_hardcopy(), which is responsible
-	for all system-specific interfacing.  Uses the regular line-
+	for all system-specific interfacing.  Uses the regular hugoline-
 	printing routines.
 */
 
@@ -101,8 +101,8 @@ void HardCopy(void)
 	if ((printer = fopen(printer_name, "wt"))==NULL)
 		goto DeviceError;
 
-	sprintf(debug_line, "\"%s\"\n", gamefile);
-	debug_hardcopy(printer, debug_line);
+	sprintf(debug_hugoline, "\"%s\"\n", gamefile);
+	debug_hardcopy(printer, debug_hugoline);
 
 	if (active_window==CODE_WINDOW)
 	{
@@ -110,7 +110,7 @@ void HardCopy(void)
 		end = win->first+win->height;
 		if (end>=win->count) end = win->count-1;
 
-		strcpy(debug_line, "Code Window:\n");
+		strcpy(debug_hugoline, "Code Window:\n");
 	}
 	else
 	{
@@ -123,13 +123,13 @@ void HardCopy(void)
 		for (i=0; i<strlen(menu[m][active_view]); i++)
 		{
 			if (menu[m][active_view][i]!='&')
-				debug_line[j++] = menu[m][active_view][i];
+				debug_hugoline[j++] = menu[m][active_view][i];
 		}
-		sprintf(debug_line+j, ":\n");
+		sprintf(debug_hugoline+j, ":\n");
 	}
 
 	/* Print the name of the active window */
-	debug_hardcopy(printer, debug_line);
+	debug_hardcopy(printer, debug_hugoline);
 
 	if (win->count==0) goto FinishPrinting;
 
@@ -158,8 +158,8 @@ FinishPrinting:
 	if (!device_error) return;
 
 DeviceError:
-	sprintf(debug_line, "Unable to print to %s", printer_name);
-	DebugMessageBox("Printing Error", debug_line);
+	sprintf(debug_hugoline, "Unable to print to %s", printer_name);
+	DebugMessageBox("Printing Error", debug_hugoline);
 	device_error = false;
 }
 
@@ -167,7 +167,7 @@ DeviceError:
 /* HIGHLIGHTCURRENT
 
 	Depending on the value of a, either draws (1) or erases (0)
-	the highlight from the current line in the active window.
+	the highlight from the current hugoline in the active window.
 */
 
 void HighlightCurrent(int a)
@@ -191,7 +191,7 @@ void HighlightCurrent(int a)
 	debug_settextpos(2, (win->top - win->first + win->selected));
 
 	/* If erasing current highlight, cheat the currently selected
-	   line and restore it later.
+	   hugoline and restore it later.
 	*/
 	if (!a) win->selected = -1;
 	
@@ -349,8 +349,8 @@ ForceRedrawAll:
 CheckLeftRight:
 				if (active_window==CODE_WINDOW)
 				{
-					if (win->horiz > (int)int_strlen(codeline[win->selected])-win->width)
-						win->horiz = int_strlen(codeline[win->selected])-win->width;
+					if (win->horiz > (int)int_strlen(codehugoline[win->selected])-win->width)
+						win->horiz = int_strlen(codehugoline[win->selected])-win->width;
 					if (win->horiz < 0) win->horiz = 0;
 				}
 				else if (active_window==VIEW_WATCH)
@@ -372,22 +372,22 @@ CheckLeftRight:
 			{
 				new_selected = win->horiz;
 
-				/* Move to the start of the line */
+				/* Move to the start of the hugoline */
 				if (win->horiz!=0 && event.object==HOME)
 					win->horiz = 0;
 
-				/* Move to the end of the line */
+				/* Move to the end of the hugoline */
 				else if (event.object==END)
-					if ((active_window==CODE_WINDOW && win->horiz < (int)int_strlen(codeline[win->selected])-win->width)
+					if ((active_window==CODE_WINDOW && win->horiz < (int)int_strlen(codehugoline[win->selected])-win->width)
 					|| (active_window==VIEW_WATCH && win->horiz < (int)watch[win->selected].strlen-win->width))
 
 						/* Cheat a large enough value to force
-						   the end-of-line-figuring mechanism
+						   the end-of-hugoline-figuring mechanism
 						   to trigger:
 						*/
 						win->horiz = 32767;
 
-				/* Now move the line position if anything changed */
+				/* Now move the hugoline position if anything changed */
 				if ((unsigned)win->horiz!=new_selected) goto CheckLeftRight;
 
 				break;
@@ -443,14 +443,14 @@ void PrintAliasLine(unsigned int i)
 
 	if (hard_copy)
 	{
-		ConverttoChar(l, debug_line);
-		debug_hardcopy(printer, debug_line);
+		ConverttoChar(l, debug_hugoline);
+		debug_hardcopy(printer, debug_hugoline);
 		return;
 	}
 
-	memset(screen_line, ' ', window[VIEW_ALIASES].width-2-int_strlen(l));
-	screen_line[window[VIEW_ALIASES].width-int_strlen(l)] = '\0';
-	AddString(screen_line, l, int_strlen(l), TOKEN_TEXT);
+	memset(screen_hugoline, ' ', window[VIEW_ALIASES].width-2-int_strlen(l));
+	screen_hugoline[window[VIEW_ALIASES].width-int_strlen(l)] = '\0';
+	AddString(screen_hugoline, l, int_strlen(l), TOKEN_TEXT);
 
 	int_print(l, printflag, 0, window[VIEW_ALIASES].width);
 }
@@ -460,13 +460,13 @@ void PrintAliasLine(unsigned int i)
 
 void PrintBlankLine(unsigned int l)
 {
-	memset(screen_line, ' ', window[active_view].width);
-	screen_line[window[active_view].width] = '\0';
+	memset(screen_hugoline, ' ', window[active_view].width);
+	screen_hugoline[window[active_view].width] = '\0';
 	debug_settextpos(2, l+window[active_view].top);
 	debug_settextcolor(color[NORMAL_TEXT]);
 	debug_setbackcolor(color[NORMAL_BACK]);
 
-	debug_print(screen_line);
+	debug_print(screen_hugoline);
 }       
 
 
@@ -474,17 +474,17 @@ void PrintBlankLine(unsigned int l)
 
 void PrintBreakpoint(unsigned int i)
 {
-	sprintf(screen_line, "  %6s:", PrintHex(breakpoint[i].addr));
-	sprintf(screen_line+strlen(screen_line), "  in %s", ((breakpoint[i].in)[0]=='\0')?"(Unknown)":breakpoint[i].in);
+	sprintf(screen_hugoline, "  %6s:", PrintHex(breakpoint[i].addr));
+	sprintf(screen_hugoline+strlen(screen_hugoline), "  in %s", ((breakpoint[i].in)[0]=='\0')?"(Unknown)":breakpoint[i].in);
 
 	if (hard_copy)
 	{
-		debug_hardcopy(printer, screen_line);
+		debug_hardcopy(printer, screen_hugoline);
 		return;
 	}
 
-	memset(screen_line+strlen(screen_line), ' ', window[VIEW_BREAKPOINTS].width-strlen(screen_line));
-	screen_line[window[VIEW_BREAKPOINTS].width] = '\0';
+	memset(screen_hugoline+strlen(screen_hugoline), ' ', window[VIEW_BREAKPOINTS].width-strlen(screen_hugoline));
+	screen_hugoline[window[VIEW_BREAKPOINTS].width] = '\0';
 
 	if (i==window[VIEW_BREAKPOINTS].selected && active_window==VIEW_BREAKPOINTS)
 	{
@@ -497,7 +497,7 @@ void PrintBreakpoint(unsigned int i)
 		debug_setbackcolor(color[NORMAL_BACK]);
 	}
 
-	debug_print(screen_line);
+	debug_print(screen_hugoline);
 }
 
 
@@ -510,24 +510,24 @@ void PrintCallLine(unsigned int i)
 
 	indent = i-window[VIEW_CALLS].first;
 
-	memset(screen_line, ' ', indent);
-	sprintf(screen_line+indent, "%s", (r = RoutineName(call[i].addr)));
+	memset(screen_hugoline, ' ', indent);
+	sprintf(screen_hugoline+indent, "%s", (r = RoutineName(call[i].addr)));
 	
 	/* If this isn't a property routine or an event, print either "()"
 	   or "(...)" depending on whether any arguments were passed
 	   when the routine was called.
 	*/
 	if (strchr(r, '.')==NULL && strstr(r, "vent ")==NULL)
-		sprintf(screen_line+strlen(screen_line), "(%s)", (call[i].param)?"...":"");
+		sprintf(screen_hugoline+strlen(screen_hugoline), "(%s)", (call[i].param)?"...":"");
 
 	if (hard_copy)
 	{
-		debug_hardcopy(printer, screen_line);
+		debug_hardcopy(printer, screen_hugoline);
 		return;
 	}
 
-	memset(screen_line+strlen(screen_line), ' ', window[VIEW_BREAKPOINTS].width-strlen(screen_line));
-	screen_line[window[VIEW_BREAKPOINTS].width] = '\0';
+	memset(screen_hugoline+strlen(screen_hugoline), ' ', window[VIEW_BREAKPOINTS].width-strlen(screen_hugoline));
+	screen_hugoline[window[VIEW_BREAKPOINTS].width] = '\0';
 
 	if (i==window[VIEW_CALLS].selected && active_window==VIEW_CALLS)
 	{
@@ -545,7 +545,7 @@ void PrintCallLine(unsigned int i)
 		debug_setbackcolor(color[NORMAL_BACK]);
 	}
 
-	debug_print(screen_line);
+	debug_print(screen_hugoline);
 }
 
 
@@ -571,12 +571,12 @@ void PrintCodeLine(unsigned int l, int horizontal, int width)
 
 	if (hard_copy)
 	{
-		ConverttoChar(codeline[l], debug_line);
-		debug_hardcopy(printer, debug_line);
+		ConverttoChar(codehugoline[l], debug_hugoline);
+		debug_hardcopy(printer, debug_hugoline);
 		return;
 	}
 
-	int_print(codeline[l], printflag, horizontal, width);
+	int_print(codehugoline[l], printflag, horizontal, width);
 }
 
 
@@ -598,21 +598,21 @@ void PrintLocalLine(unsigned int i)
 	/* In case the local variable name has been blanked, likely by
 	   stepping backward
 	*/
-	sprintf(screen_line, "  %s : ", localname[i]);
-	strcpy(debug_line, "");
-	ReturnWatchValue(debug_line, var[MAXGLOBALS+i], local_view_type);
-	strcat(screen_line, debug_line);
+	sprintf(screen_hugoline, "  %s : ", localname[i]);
+	strcpy(debug_hugoline, "");
+	ReturnWatchValue(debug_hugoline, var[MAXGLOBALS+i], local_view_type);
+	strcat(screen_hugoline, debug_hugoline);
 
 	if (hard_copy)
 	{
-		debug_hardcopy(printer, screen_line);
+		debug_hardcopy(printer, screen_hugoline);
 		return;
 	}
 
-	memset(screen_line+strlen(screen_line), ' ', window[VIEW_LOCALS].width-strlen(screen_line));
-	screen_line[window[VIEW_LOCALS].width] = '\0';
+	memset(screen_hugoline+strlen(screen_hugoline), ' ', window[VIEW_LOCALS].width-strlen(screen_hugoline));
+	screen_hugoline[window[VIEW_LOCALS].width] = '\0';
 
-	debug_print(screen_line);	
+	debug_print(screen_hugoline);	
 }
 
 
@@ -643,7 +643,7 @@ void PrintOtherLine(int v, unsigned int i)
 void PrintWatch(unsigned int w)
 {
 	char c[3];                      /* following character(s) */
-	char startofline = true;
+	char startofhugoline = true;
 	int pos = 0;
 	int val;
 	struct token_structure tok;
@@ -675,8 +675,8 @@ void PrintWatch(unsigned int w)
 	*/
 	while (watch[w].expr[pos]!=EOL_T)
 	{
-		tok = GetToken(mem, (long)arraytable*16L + (long)debug_workspace + (long)pos, startofline);
-		startofline = false;
+		tok = GetToken(mem, (long)arraytable*16L + (long)debug_workspace + (long)pos, startofhugoline);
+		startofhugoline = false;
 
 		strcat(watch_buffer, tok.token);
 		if (tok.following)
@@ -738,7 +738,7 @@ void PrintWatch(unsigned int w)
 	else
 		pos = 0;
 
-	/* Fill the rest of the line, if necessary, with spaces */
+	/* Fill the rest of the hugoline, if necessary, with spaces */
 	if (pos < win->width)
 	{
 		memset(watch_buffer, ' ', win->width);
@@ -782,50 +782,50 @@ void SwitchtoView(int v)
 
 /* UPDATECODEWINDOW
 
-	Draws only the most recently buffered (i.e., unprinted) lines.
+	Draws only the most recently buffered (i.e., unprinted) hugolines.
 	A redraw of the entire code window can be forced by setting
-	buffered_code_lines to a number greater than the window height,
+	buffered_code_hugolines to a number greater than the window height,
 	e.g., FORCE_REDRAW.
 */
 
 void UpdateCodeWindow(void)
 {
-	unsigned int i, selected_line, pos, start, amount_to_scroll;
+	unsigned int i, selected_hugoline, pos, start, amount_to_scroll;
 	struct window_structure *win;
 	win = &window[CODE_WINDOW];     /* shorthand */
 
 	currently_updating = CODE_WINDOW;
 
-	if ((unsigned)buffered_code_lines > win->height)
+	if ((unsigned)buffered_code_hugolines > win->height)
 	{
 		start = (win->count > win->height)?win->count - win->height:0;
 
 		window[CODE_WINDOW].first = start;
 		UpdateFullCodeWindow(start, win->horiz, win->width);
-		buffered_code_lines = 0;
+		buffered_code_hugolines = 0;
 		return;
 	}
-	else if (buffered_code_lines==0) return;
+	else if (buffered_code_hugolines==0) return;
 
-	/* The next line to be printed */
-	selected_line = win->count - buffered_code_lines;
+	/* The next hugoline to be printed */
+	selected_hugoline = win->count - buffered_code_hugolines;
 
-	/* Unhighlight the old last-line highlight, if any */
-	if (selected_line > 0)
+	/* Unhighlight the old last-hugoline highlight, if any */
+	if (selected_hugoline > 0)
 	{
-		pos = win->top + win->count-1-buffered_code_lines;
+		pos = win->top + win->count-1-buffered_code_hugolines;
 		if (pos > win->top + win->height-1) pos = win->top + win->height-1;
 		debug_settextpos(2, pos);
-		PrintCodeLine(selected_line-1, win->horiz, win->width);
+		PrintCodeLine(selected_hugoline-1, win->horiz, win->width);
 	}
 
 	/* Scroll the existing window up if need be */
 	if (win->count > win->first + win->height)
 	{
-		if (win->count - (win->first+win->height) < (unsigned)buffered_code_lines)
+		if (win->count - (win->first+win->height) < (unsigned)buffered_code_hugolines)
 			amount_to_scroll = win->count - (win->first+win->height);
 		else
-			amount_to_scroll = buffered_code_lines;
+			amount_to_scroll = buffered_code_hugolines;
 
 		debug_windowscroll(2, win->top, 
 			D_SCREENWIDTH-1, win->top+win->height-1, UP, amount_to_scroll);
@@ -833,15 +833,15 @@ void UpdateCodeWindow(void)
 		win->first += amount_to_scroll;
 	}
 
-	/* Now print the buffered lines */
-	for (i=0; buffered_code_lines>0; i++, buffered_code_lines--)
+	/* Now print the buffered hugolines */
+	for (i=0; buffered_code_hugolines>0; i++, buffered_code_hugolines--)
 	{
-		pos = win->top + min(win->height, win->count) - buffered_code_lines;
+		pos = win->top + min(win->height, win->count) - buffered_code_hugolines;
 		debug_settextpos(2, pos);
-		PrintCodeLine(selected_line+i, win->horiz, win->width);
+		PrintCodeLine(selected_hugoline+i, win->horiz, win->width);
 	}
 
-	buffered_code_lines = 0;
+	buffered_code_hugolines = 0;
 }
 
 

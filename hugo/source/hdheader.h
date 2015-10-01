@@ -140,7 +140,7 @@ char *strlwr(char *s);
 #define DEFAULT_VALUE_TEXT      12      /* light red     */
 #define DEFAULT_VARIABLE_TEXT   15      /* bright white  */
 
-/* PC Extended-ASCII line-drawing characters (could be replaced
+/* PC Extended-ASCII hugoline-drawing characters (could be replaced
    with regular ASCII characters, i.e., '-', '+', and '|')
 */
 #define HORIZONTAL_LINE         '�'
@@ -343,7 +343,7 @@ void PrintFatalDebuggerError(char *a);
 #define DEFAULT_VALUE_TEXT      12      /* light red     */
 #define DEFAULT_VARIABLE_TEXT   15      /* bright white  */
 
-/* PC Extended-ASCII line-drawing characters (could be replaced
+/* PC Extended-ASCII hugoline-drawing characters (could be replaced
    with regular ASCII characters, i.e., '-', '+', and '|')
 */
 #define HORIZONTAL_LINE         '�'
@@ -493,7 +493,7 @@ void debug_switchscreen(int screen);
 void debug_windowbottomrow(char *caption);
 void debug_windowrestore(void *buf, int xpos, int ypos);
 void *debug_windowsave(int left, int top, int right, int bottom);
-void debug_windowscroll(int left, int top, int right, int bottom, int param, int lines);
+void debug_windowscroll(int left, int top, int right, int bottom, int param, int hugolines);
 void debug_windowshadow(int left, int top, int right, int bottom);
 
 
@@ -515,7 +515,7 @@ int int_strlen(int *a);
 void int_strcpy(int *a, int *b);
 
 extern char format_nesting;
-extern char screen_line[];
+extern char screen_hugoline[];
 
 
 /* hdmisc.c */

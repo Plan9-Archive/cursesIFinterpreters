@@ -77,8 +77,8 @@ void EnterWatch(void)
 
 	if ((w = window[VIEW_WATCH].count)==MAXWATCHES)
 	{
-		sprintf(debug_line, "Maximum of %d watch expressions", MAXWATCHES);
-		DebugMessageBox(t, debug_line);
+		sprintf(debug_hugoline, "Maximum of %d watch expressions", MAXWATCHES);
+		DebugMessageBox(t, debug_hugoline);
 		return;
 	}
 
@@ -165,7 +165,7 @@ int EvalWatch(void)
 
 	Heisted (largely) from the compiler's HCBUILD.C.  If the token
 	is invalid, returns -1 and stores an appropriate error message
-	in the line array.  Otherwise, it returns the token code, and
+	in the hugoline array.  Otherwise, it returns the token code, and
 	stores the real value in z (if applicable).
 */
 
@@ -193,7 +193,7 @@ int IDWord(char *a)
 			ReturnSymbol(DICTENTRY_T);
 		}
 		
-		sprintf(debug_line, "Not in dictionary:  \"%s\"", a);
+		sprintf(debug_hugoline, "Not in dictionary:  \"%s\"", a);
 		ReturnSymbol(-1);
 	}
 
@@ -223,7 +223,7 @@ int IDWord(char *a)
 		i = atoi(a+6);
 		if (i<1 || i>MAXLOCALS)
 		{
-			sprintf(debug_line, "Local variable out of range:  %s", a);
+			sprintf(debug_hugoline, "Local variable out of range:  %s", a);
 			ReturnSymbol(-1);
 		}
 		else
@@ -241,7 +241,7 @@ int IDWord(char *a)
 		{
 			if (last_symbol!=AMPERSAND_T)
 			{
-				sprintf(debug_line, "Routine call illegal in expression");
+				sprintf(debug_hugoline, "Routine call illegal in expression");
 				ReturnSymbol(-1);
 			}
 
@@ -303,7 +303,7 @@ int IDWord(char *a)
 	if (a[0]=='\'')
 	{
 		if ((a[2]!='\'' && a[1]!='\\') || (a[1]=='\\' && a[3]!='\''))
-			{sprintf(debug_line, "Unknown ASCII value:  %s", a);
+			{sprintf(debug_hugoline, "Unknown ASCII value:  %s", a);
 			ReturnSymbol(-1);}
 		if (a[1]=='\\') token_val = toascii(a[2]);
 		else token_val = toascii(a[1]);
@@ -311,7 +311,7 @@ int IDWord(char *a)
 	}
 
 	/* If we get here, then no match was made */
-	sprintf(debug_line, "Syntax error in expression:  %s", a);
+	sprintf(debug_hugoline, "Syntax error in expression:  %s", a);
 	ReturnSymbol(-1);
 }
 
@@ -396,7 +396,7 @@ int ParseExpression(char *expr)
 	for (i=0; i<(int)strlen(expr); i++)
 	{
 		/* Must be room for at least 3 more bytes (the largest any
-		   expression element will be) + 1 for end-of-line.
+		   expression element will be) + 1 for end-of-hugoline.
 		*/
 		if (m > debug_workspace+251)
 		{
@@ -427,7 +427,7 @@ int ParseExpression(char *expr)
 
 			if (size+i > (int)strlen(expr))
 			{
-				strcpy(debug_line, "Missing closing quote");
+				strcpy(debug_hugoline, "Missing closing quote");
 				goto PrintExpressionError;
 			}
 
@@ -449,12 +449,12 @@ int ParseExpression(char *expr)
 		tok = IDWord(expr+i);
 
 		/* If IDWord() returns -1, the token is invalid,
-		   and the line array holds the error message.
+		   and the hugoline array holds the error message.
 		*/
 		if (tok==-1)
 		{
 PrintExpressionError:
-			DebugMessageBox("Expression Error", debug_line);
+			DebugMessageBox("Expression Error", debug_hugoline);
 			return false;
 		}
 

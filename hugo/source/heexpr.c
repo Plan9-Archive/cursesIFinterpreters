@@ -125,15 +125,15 @@ int EvalExpr(int p)
 				if (next_prec >= last_precedence)
 				{
 #if defined (DEBUG_PRECEDENCE)
-sprintf(line, "Not preferring %s to %s because of previous level %d", token[eval[p+7]], token[oper], last_precedence);
-Printout(line);
+sprintf(hugoline, "Not preferring %s to %s because of previous level %d", token[eval[p+7]], token[oper], last_precedence);
+Printout(hugoline);
 #endif
 					goto ReturnResult;
 				}
 
 #if defined (DEBUG_PRECEDENCE)
-sprintf(line, "Preferring %s to %s", token[eval[p+7]], token[oper]);
-Printout(line);
+sprintf(hugoline, "Preferring %s to %s", token[eval[p+7]], token[oper]);
+Printout(hugoline);
 #endif
 
 				temp_lp = last_precedence;
@@ -148,8 +148,8 @@ Printout(line);
 		}
 
 #if defined (DEBUG_PRECEDENCE)
-sprintf(line, "Solving %d %s %d", n1, token[oper], n2);
-Printout(line);
+sprintf(hugoline, "Solving %d %s %d", n1, token[oper], n2);
+Printout(hugoline);
 #endif
 
 		switch (oper)
@@ -258,7 +258,7 @@ Printout(line);
 
 
 	/* Keep looping while there are expression elements, or until there
-	   is a ")", "]", or end of line
+	   is a ")", "]", or end of hugoline
 	*/
 	} while ((evalcount>p+2) && !(eval[p+2]==1 &&
 		(eval[p+3]==CLOSE_BRACKET_T || eval[p+3]==CLOSE_SQUARE_T ||
@@ -273,8 +273,8 @@ ReturnResult:
 #if defined (DEBUG_EXPR_EVAL)
 	if (p==0 && exprt)
 	{
-		sprintf(line, " = %d", result);
-		AP(line);
+		sprintf(hugoline, " = %d", result);
+		AP(hugoline);
 	}
 #endif
 	return result;
@@ -404,7 +404,7 @@ int GetVal()
 
 			if (game_version >= 22)
 			{
-				/* Pre-v2.4 included linelength and pagelength as
+				/* Pre-v2.4 included hugolinelength and pagelength as
 				   global variables after objectcount
 				*/
 				if (i <= ((game_version>=24)?objectcount:objectcount+2))
@@ -422,7 +422,7 @@ int GetVal()
 #endif
 					}
 					else if (i==objectcount+2)
-						val = SCREENHEIGHT/lineheight;
+						val = SCREENHEIGHT/hugolineheight;
 				}
 			}
 			codeptr++;
@@ -1023,8 +1023,8 @@ char IsIncrement(long addr)
 	if (t && debug_eval)
 	{
 		debug_eval_error = true;
-		sprintf(debug_line, "'%s%s' illegal in watch/assignment", token[a], token[MEM(addr+1)]);
-		DebugMessageBox("Expression Error", debug_line);
+		sprintf(debug_hugoline, "'%s%s' illegal in watch/assignment", token[a], token[MEM(addr+1)]);
+		DebugMessageBox("Expression Error", debug_hugoline);
 		t = 0;
 	}
 #endif
@@ -1093,8 +1093,8 @@ void PrintExpr(void)
 		{
 			case 0:
 			{
-				sprintf(line, "%d ", eval[i + 1]);
-				strcat(e, line);
+				sprintf(hugoline, "%d ", eval[i + 1]);
+				strcat(e, hugoline);
 				break;
 			}
 			case 1:
@@ -1107,8 +1107,8 @@ void PrintExpr(void)
 				if (token[eval[i+1]][0]=='~')
 					strcat(e, "\\");
 				if (eval[i+1] != 255)
-					{sprintf(line, "%s ", token[eval[i+1]]);
-					strcat(e, line);}
+					{sprintf(hugoline, "%s ", token[eval[i+1]]);
+					strcat(e, hugoline);}
 				break;
 			}
 		}

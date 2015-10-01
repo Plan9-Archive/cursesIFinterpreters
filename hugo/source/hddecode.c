@@ -1,7 +1,7 @@
 /*
 	HDDECODE.C
 
-	contains line-decoding routines:
+	contains hugoline-decoding routines:
 
 		AddLinetoCodeWindow
 			AddAddress
@@ -37,22 +37,22 @@ int AddSymbol(unsigned char *arr, long *addr, int *l, int lpos);
 
 long this_codeptr;			/* for error recovery    */
 long next_codeptr;			/* for skipping over     */
-int **codeline;                         /* code window contents  */
-int buffered_code_lines = 0;            /* waiting to be printed */
+int **codehugoline;                         /* code window contents  */
+int buffered_code_hugolines = 0;            /* waiting to be printed */
 
 char format_nesting = 1;	/* for spacing in Code window */
-char screen_line[256];
+char screen_hugoline[256];
 
 
 /* ADDLINETOCODEWINDOW
 
 	Calls DecodeLine to decode the next instruction, and looks
-	after storing it in the codeline array.
+	after storing it in the codehugoline array.
 */
 
 void AddLinetoCodeWindow(long addr)
 {
-	int *decoded_line;
+	int *decoded_hugoline;
 	struct window_structure *win;
 
 	win = &window[CODE_WINDOW];
@@ -62,26 +62,26 @@ void AddLinetoCodeWindow(long addr)
 		ShiftCodeLines();
 	}
 
-	decoded_line = DecodeLine(addr);
+	decoded_hugoline = DecodeLine(addr);
 
-	/* Allocate memory for the new line */
-	while ((codeline[win->count]=malloc((size_t)(int_strlen(decoded_line)+1)*sizeof(int)))==NULL)
+	/* Allocate memory for the new hugoline */
+	while ((codehugoline[win->count]=malloc((size_t)(int_strlen(decoded_hugoline)+1)*sizeof(int)))==NULL)
 	{
 		ShiftCodeLines();
 	}
 
-	int_strcpy(codeline[win->count], decoded_line);
+	int_strcpy(codehugoline[win->count], decoded_hugoline);
 
-	/* Only need to count buffered code lines to a point */
-	if (++buffered_code_lines > FORCE_REDRAW) buffered_code_lines = FORCE_REDRAW;
+	/* Only need to count buffered code hugolines to a point */
+	if (++buffered_code_hugolines > FORCE_REDRAW) buffered_code_hugolines = FORCE_REDRAW;
 
         win->count++;
 
-	/* Current code line--set it to the new line, and if it was more
-	   than one full window height back of the new line, force a full-
+	/* Current code hugoline--set it to the new hugoline, and if it was more
+	   than one full window height back of the new hugoline, force a full-
 	   window redraw
 	*/
-	if (win->selected < win->count - win->height) buffered_code_lines = FORCE_REDRAW;
+	if (win->selected < win->count - win->height) buffered_code_hugolines = FORCE_REDRAW;
 	win->selected = win->count-1;
 	win->horiz = 0;
 }
@@ -100,19 +100,19 @@ void AddStringtoCodeWindow(char *a)
 		ShiftCodeLines();
 	}
 
-	/* Allocate memory for the new line */
-	while ((codeline[win->count]=malloc((size_t)(strlen(a)+1)*sizeof(int)))==NULL)
+	/* Allocate memory for the new hugoline */
+	while ((codehugoline[win->count]=malloc((size_t)(strlen(a)+1)*sizeof(int)))==NULL)
 	{
 		ShiftCodeLines();
 	}
 
-	AddString(a, codeline[win->count], 0, ROUTINE_TEXT);
+	AddString(a, codehugoline[win->count], 0, ROUTINE_TEXT);
 
-        buffered_code_lines++;
+        buffered_code_hugolines++;
         win->count++;
 
-	/* Current code line adjustment--see AddLinetoCodeWindow() */
-	if (win->selected < win->count - win->height) buffered_code_lines = 100;
+	/* Current code hugoline adjustment--see AddLinetoCodeWindow() */
+	if (win->selected < win->count - win->height) buffered_code_hugolines = 100;
 	win->selected = win->count-1;
 	win->horiz = 0;
 }
@@ -120,7 +120,7 @@ void AddStringtoCodeWindow(char *a)
 
 /* ADDADDRESS
 
-	Adds the supplied address to the line <l> at the given position,
+	Adds the supplied address to the hugoline <l> at the given position,
 	in the specified color type.
 */
 
@@ -142,7 +142,7 @@ void AddAddress(long a, int *l, int lpos, int coltype)
 
 /* ADDSTRING
 
-	Adds the supplied string to the line <l> at the given position,
+	Adds the supplied string to the hugoline <l> at the given position,
 	in the specified color type.
 */
 
@@ -162,7 +162,7 @@ void AddString(char *s, int *l, int lpos, int coltype)
 /* ADDSYMBOL
 
 	Adds the current symbol (taken from the supplied array, usually
-	mem[]), to the line <l> at the given position, and returns the
+	mem[]), to the hugoline <l> at the given position, and returns the
 	number of characters added.
 */
 
@@ -220,9 +220,9 @@ int AddSymbol(unsigned char *arr, long *addr, int *l, int lpos)
 
 /* DECODELINE
 
-	The main line-decoding routine, decodes the chunk of code at the
-	supplied address into a line of pseudo-source, and returns a
-	pointer to the int array containing the line.  It's an int
+	The main hugoline-decoding routine, decodes the chunk of code at the
+	supplied address into a hugoline of pseudo-source, and returns a
+	pointer to the int array containing the hugoline.  It's an int
 	array since the low byte contains the character, and the high
 	byte contains the color.
 */
@@ -239,7 +239,7 @@ int *DecodeLine(long addr)
 	AddString(":  ", l, lpos+6, TOKEN_TEXT);
 	lpos += 9;
 
-	/* Indent current line if this option is selected */
+	/* Indent current hugoline if this option is selected */
 	if (format_nesting)
 	{
 		for (b=0; b<dbnest; b++)
@@ -249,15 +249,15 @@ int *DecodeLine(long addr)
 		}
 	}
 
-	/* Based on what the first token in the line is, we can determine
-	   what the rest of the line will look like:
+	/* Based on what the first token in the hugoline is, we can determine
+	   what the rest of the hugoline will look like:
 	*/
 	switch (MEM(addr))
 	{
 		case CLOSE_BRACE_T:
 			break;
 
-		/* Normal case:  lines with EOL at the end */
+		/* Normal case:  hugolines with EOL at the end */
 		case RETURN_T:
 		case RUN_T:
 		case PRINT_T:
@@ -336,20 +336,20 @@ PrinttoEnd:
 		/* Special case:  printing from text bank */
 		case TEXTDATA_T:
 		{
-			debug_line[0] = '\"';
-			strncpy(debug_line+1, GetText((long)(MEM(addr+1)*65536+PeekWord(addr+2))), D_SCREENWIDTH-4-lpos);
-			sprintf(debug_line+D_SCREENWIDTH-7-lpos, "...");
-			debug_line[strlen(debug_line)+1] = '\0';
-			debug_line[strlen(debug_line)] = '\"';
+			debug_hugoline[0] = '\"';
+			strncpy(debug_hugoline+1, GetText((long)(MEM(addr+1)*65536+PeekWord(addr+2))), D_SCREENWIDTH-4-lpos);
+			sprintf(debug_hugoline+D_SCREENWIDTH-7-lpos, "...");
+			debug_hugoline[strlen(debug_hugoline)+1] = '\0';
+			debug_hugoline[strlen(debug_hugoline)] = '\"';
 			addr+=4;
 			if (MEM(addr)==SEMICOLON_T)
 			{
-				strcat(debug_line, ";");
+				strcat(debug_hugoline, ";");
 				addr++;
 			}
-			else strcat(debug_line, " ");
-			AddString(debug_line, l, lpos, STRING_TEXT);
-			lpos+=strlen(debug_line);
+			else strcat(debug_hugoline, " ");
+			AddString(debug_hugoline, l, lpos, STRING_TEXT);
+			lpos+=strlen(debug_hugoline);
 			break;
 		}
 
@@ -378,13 +378,13 @@ PrinttoEnd:
 			break;
 		}
 
-		/* Anything else is a one-word line */
+		/* Anything else is a one-word hugoline */
 		default:
 AddSingleSymbol:
 			lpos += AddSymbol(mem, &addr, l, lpos);
 	}
 
-	next_codeptr = addr;	/* for skipping over this line */
+	next_codeptr = addr;	/* for skipping over this hugoline */
 
 	return l;
 }
@@ -407,7 +407,7 @@ struct token_structure GetToken(unsigned char *arr, long addr, int firsttoken)
 	int tlen, col, n;
 	static struct token_structure tok;
 
-	/* If start of the line, there was no first token */
+	/* If start of the hugoline, there was no first token */
 	if (firsttoken==1) lasttoken = 0;
 
 	switch (arr[addr])
@@ -444,8 +444,8 @@ struct token_structure GetToken(unsigned char *arr, long addr, int firsttoken)
 		{
 PrintDictWord:
 			col = STRING_TEXT;
-			sprintf(screen_line, "\"%s\"", GetWord(WORD_VAL(addr+1)));
-			a = screen_line;
+			sprintf(screen_hugoline, "\"%s\"", GetWord(WORD_VAL(addr+1)));
+			a = screen_hugoline;
 			tlen = 3;
 			break;
 		}
@@ -460,8 +460,8 @@ PrintDictWord:
 		{
 			if (lasttoken==PRINT_T) goto PrintDictWord;
 			col = VALUE_TEXT;
-			itoa((short)WORD_VAL(addr+1), screen_line, 10);
-			a = screen_line;
+			itoa((short)WORD_VAL(addr+1), screen_hugoline, 10);
+			a = screen_hugoline;
 			tlen = 3;
 			break;
 		}
@@ -481,24 +481,24 @@ PrintDictWord:
 		}
 		case STRINGDATA_T:
 		{
-			int nlen;	/* Don't overflow screen_line */
+			int nlen;	/* Don't overflow screen_hugoline */
 			col = STRING_TEXT;
 			n = arr[addr+1]+arr[addr+2]*256;
 			nlen = n;
 			if (nlen >= 251) nlen = 250;
-			screen_line[0] = '\"';
+			screen_hugoline[0] = '\"';
 			j = 1;
 			for (i=0; i<nlen; i++)
-				screen_line[j++] = (char)(arr[addr+3+i]-CHAR_TRANSLATION);
+				screen_hugoline[j++] = (char)(arr[addr+3+i]-CHAR_TRANSLATION);
 			if (nlen < n)
 			{
 				for (i=1; i<=3; i++)
-					screen_line[j++] = '.';
+					screen_hugoline[j++] = '.';
 			}
-			screen_line[j] = '\"';
-			screen_line[j+1] = '\0';
+			screen_hugoline[j] = '\"';
+			screen_hugoline[j+1] = '\0';
 			tlen = n+3;
-			a = screen_line;
+			a = screen_hugoline;
 			break;
 		}
 
@@ -514,7 +514,7 @@ PrintDictWord:
 
 
 	/* Adapted from PrintWords in hcmisc.c to adjust the spacing of
-	   certain symbols/operators in a line: */
+	   certain symbols/operators in a hugoline: */
 
 	/* Only worry if a single-character token is involved */
 	if (((arr[addr]<=TOKENS && arr[addr+tlen]<=TOKENS)) &&
@@ -593,30 +593,30 @@ PrintDictWord:
 /* SHIFTCODELINES
 
 	Shifts the array of window information up, deleting the
-	50 oldest lines.  Used by the AllocMem() function to
-	cannibalize code lines for other purposes.
+	50 oldest hugolines.  Used by the AllocMem() function to
+	cannibalize code hugolines for other purposes.
 */
 
 void ShiftCodeLines(void)
 {
 	unsigned int i;
 
-	/* Can only cannibalize as many lines as aren't visible */
+	/* Can only cannibalize as many hugolines as aren't visible */
 	if (window[CODE_WINDOW].count<=(unsigned)window[CODE_WINDOW].height + 50)
 		DebuggerFatal(D_MEMORY_ERROR);
 
-	/* Delete 50 oldest lines */
+	/* Delete 50 oldest hugolines */
 	for (i=0; i<50; i++)
-		free(codeline[i]);
+		free(codehugoline[i]);
 
-	/* Shift lines up */
+	/* Shift hugolines up */
 	for (i=50; i<window[CODE_WINDOW].count; i++)
-		codeline[i-49] = codeline[i];
+		codehugoline[i-49] = codehugoline[i];
 
-	/* Delete the oldest line, and add "..." to the start */
-	if ((codeline[0]=malloc(4*sizeof(int)))==NULL)
+	/* Delete the oldest hugoline, and add "..." to the start */
+	if ((codehugoline[0]=malloc(4*sizeof(int)))==NULL)
 		DebuggerFatal(D_MEMORY_ERROR);
-	AddString("...", codeline[0], 0, ROUTINE_TEXT);
+	AddString("...", codehugoline[0], 0, ROUTINE_TEXT);
 
 	window[CODE_WINDOW].count -= 49;
 	window[CODE_WINDOW].first -= 49;
@@ -652,9 +652,9 @@ void int_print(int *a, int col, int pos, int width)
 	{
 		for (i=pos; i<int_strlen(a); i++)
 		{
-			sprintf(screen_line, "%c", a[i]&0x00FF);
+			sprintf(screen_hugoline, "%c", a[i]&0x00FF);
 			if (col==-1) debug_settextcolor(color[(a[i]&0xFF00)/256]);
-			debug_print(screen_line);
+			debug_print(screen_hugoline);
 			if (++printed==width) return;
 		}
 	}
@@ -665,9 +665,9 @@ void int_print(int *a, int col, int pos, int width)
 		debug_settextcolor(color[NORMAL_TEXT]);
 		debug_setbackcolor(color[NORMAL_BACK]);
 	}
-	memset(screen_line, ' ', width-printed);
-	screen_line[width-printed] = '\0';
-	debug_print(screen_line);
+	memset(screen_hugoline, ' ', width-printed);
+	screen_hugoline[width-printed] = '\0';
+	debug_print(screen_hugoline);
 }
 
 void int_strcpy(int *a, int *b)

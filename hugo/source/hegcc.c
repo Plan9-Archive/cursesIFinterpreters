@@ -18,8 +18,8 @@
 	define).
 
 	Kent added a few features to Hugo that affected the port as
-	well.  The first is ability to specify bold, italic, underline
-	and proportional fonts.  This port supports bold, underline,
+	well.  The first is ability to specify bold, italic, underhugoline
+	and proportional fonts.  This port supports bold, underhugoline,
 	and italic (italic is indicated as reverse video).  No support
 	is provided here for proportional fonts.
 
@@ -72,7 +72,7 @@ void ConstrainCursor(void);
 #define HUGO_BRIGHT_WHITE  15
 
 
-#define HISTORY_SIZE    16      /* for command-line editing */
+#define HISTORY_SIZE    16      /* for command-hugoline editing */
 int hcount = 0;
 char *history[HISTORY_SIZE];
 
@@ -229,18 +229,18 @@ void hugo_closefiles()
     GETFILENAME:
 
     Loads the name of the filename to save or restore (as specified by
-    the argument <a>) into the line[] array.
+    the argument <a>) into the hugoline[] array.
 */
 
 void hugo_getfilename(char *a, char *b)
 {
 	unsigned int i, p;
 
-	sprintf(line, "Enter path and filename %s.", a);
-	AP(line);
+	sprintf(hugoline, "Enter path and filename %s.", a);
+	AP(hugoline);
 
-	sprintf(line,"%c(Default is %s): \\;", NO_CONTROLCHAR, b);
-	AP(line);
+	sprintf(hugoline,"%c(Default is %s): \\;", NO_CONTROLCHAR, b);
+	AP(hugoline);
 
 	p = var[prompt];
 	var[prompt] = 0;        /* null string */
@@ -251,13 +251,13 @@ void hugo_getfilename(char *a, char *b)
 
 	remaining = 0;
 
-	strcpy(line, "");
+	strcpy(hugoline, "");
 	if (words==0)
-		strcpy(line, b);
+		strcpy(hugoline, b);
 	else
 	{
 		for (i=1; i<=(unsigned int)words; i++)
-			strcat(line, word[i]);
+			strcat(hugoline, word[i]);
 	}
 }
 
@@ -284,7 +284,7 @@ int hugo_getkey(void)
 
         /*
          * In case this is used in halfdelay() or nodelay() mode
-         * need to make sure we don't pass bad data to getline()
+         * need to make sure we don't pass bad data to gethugoline()
          */
         while ((b = getch())==ERR)
         {
@@ -310,11 +310,11 @@ int hugo_getkey(void)
 /*
     GETLINE
 
-    Gets a line of input from the keyboard, storing it in <buffer>.
+    Gets a hugoline of input from the keyboard, storing it in <buffer>.
 
     (NOTE:  The function keys used here are QuickC/MS-DOS specific.
-    They have been chosen to somewhat mirror the command-line editing
-    keys of MS-DOS.  For other systems, the 'if (b==<value>)' lines
+    They have been chosen to somewhat mirror the command-hugoline editing
+    keys of MS-DOS.  For other systems, the 'if (b==<value>)' hugolines
     will likely need to be changed.)
 
     If a similar library input function is available, it will almost
@@ -326,7 +326,7 @@ int hugo_getkey(void)
 
 #define CURRENT_CHAR(c) ((c<(int)strlen(buffer))?buffer[c]:' ')
 
-void hugo_getline(char *p)
+void hugo_gethugoline(char *p)
 {
 	char ch[2];
 	int a, b, thiscommand;
@@ -342,7 +342,7 @@ NewPrompt:
 	thiscommand = hcount;
 
 	oldx = (currentpos+charwidth)/charwidth;
-	oldy = currentline;
+	oldy = currenthugoline;
 	y = oldy;
 	x = oldx + hugo_strlen(p);
 
@@ -372,7 +372,7 @@ GetKey:
 			if (script) fprintf(script, "%s%s\n", p, buffer);
 
 			hugo_settextpos(1, y + 2);
-			if (y >= physical_windowheight/lineheight - 1)
+			if (y >= physical_windowheight/hugolineheight - 1)
 				hugo_scrollwindowup();
 
 			strcpy(buffer, Rtrim(buffer));
@@ -678,7 +678,7 @@ void hugo_addcommand(void)
 	}
 
 	/* Because the debugger might use (up to) all available memory for
-	   code line storage, a different means of memory allocation is
+	   code hugoline storage, a different means of memory allocation is
 	   needed (at least in MS-DOS due to limited available memory to
 	   begin with).
 	*/
@@ -779,7 +779,7 @@ void hugo_clearfullscreen(void)
 
 	/* Must be set: */
 	currentpos = 0;
-	currentline = 1;
+	currenthugoline = 1;
 }
 
 
@@ -792,7 +792,7 @@ void hugo_clearwindow(void)
 
 	/* Must be set: */
 	currentpos = 0;
-	currentline = 1;
+	currenthugoline = 1;
 }
 
 
@@ -801,7 +801,7 @@ void hugo_settextmode(void)
 /* This function does whatever is necessary to set the system up for
    a standard text display */
         charwidth = FIXEDCHARWIDTH = 1;          /* again, for non-proportional */
-        lineheight = FIXEDLINEHEIGHT = 1;
+        hugolineheight = FIXEDLINEHEIGHT = 1;
 
 	/* Must be set: */
 	getmaxyx(current_window, SCREENHEIGHT, SCREENWIDTH);
@@ -847,12 +847,12 @@ void hugo_settextpos(int x, int y)
    of the window is row 4 on the screen, the (1, 1) refers to the 4th
    row on the screen, and (2, 1) refers to the 5th.)
 
-   This function must also properly set currentline and currentpos (where
-   currentline is a the current character line, and currentpos may be
+   This function must also properly set currenthugoline and currentpos (where
+   currenthugoline is a the current character hugoline, and currentpos may be
    either in pixels or characters, depending on the measure being used).
 */
 	/* Must be set: */
-	currentline = y;
+	currenthugoline = y;
 	currentpos = (x-1)*charwidth;   /* Note:  zero-based */
 
 	current_text_col = text_windowleft-1+x;
@@ -877,7 +877,7 @@ void ConstrainCursor(void)
 void hugo_print(char *a)
 {
 	char just_repositioned = false;
-        char last_was_newline = false;
+        char last_was_newhugoline = false;
 	int i, len;
 
 
@@ -885,7 +885,7 @@ void hugo_print(char *a)
 
 	for (i=0; i<len; i++)
 	{
-                last_was_newline = false;
+                last_was_newhugoline = false;
 
 		switch (a[i])
 		{
@@ -893,7 +893,7 @@ void hugo_print(char *a)
 				++current_text_row;
 				wmove(current_window, current_text_row, current_text_col);
 				just_repositioned = true;
-                                last_was_newline = true;
+                                last_was_newhugoline = true;
 				break;
 			case '\r':
 CarriageReturn:
@@ -925,9 +925,9 @@ CarriageReturn:
 	if (!just_repositioned) wmove(current_window, current_text_row, current_text_col);
 
         /* Because '\n' should imply '\r' */
-	if (last_was_newline)
+	if (last_was_newhugoline)
         {
-                last_was_newline = false;
+                last_was_newhugoline = false;
                 goto CarriageReturn;
         }
 }

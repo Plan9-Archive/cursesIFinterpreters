@@ -39,8 +39,8 @@ const int article = 5;
 /* "display" object properties */
 const int screenwidth = 1;
 const int screenheight = 2;
-const int linelength = 3;
-const int windowlines = 4;
+const int hugolinelength = 3;
+const int windowhugolines = 4;
 const int cursor_column = 5;
 const int cursor_row = 6;
 const int hasgraphics = 7;
@@ -87,7 +87,7 @@ int he_main(int argc, char *argv[])
 	SRANDOM((unsigned int)time((time_t *)&seed));
 #endif
 
-#if !defined (GLK)	/* no command line under Glk */
+#if !defined (GLK)	/* no command hugoline under Glk */
 	ParseCommandLine(argc, argv);
 #endif
 

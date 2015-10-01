@@ -56,7 +56,7 @@ int temp_color[17];
 char setup_path[MAXPATH];
 char last_object_tree[33] = "";
 int tree_nest;                  /* the branching level of an object tree */
-int tree_lines;                 /* the number of objects printed         */
+int tree_hugolines;                 /* the number of objects printed         */
 
 
 /* DEBUGMOVEOBJ */
@@ -73,9 +73,9 @@ void DebugMoveObj(void)
 	if (!strcmp(a, "")) return;
 	else if ((obj = ObjectNumber(a))==-1) goto NoSuchObject;
 
-	sprintf(debug_line, "Move %s to new parent:", a);
+	sprintf(debug_hugoline, "Move %s to new parent:", a);
 
-	a = InputBox(t, debug_line, 33, "");
+	a = InputBox(t, debug_hugoline, 33, "");
 
 	if (!strcmp(a, "")) return;
 	else if ((to_obj = ObjectNumber(a))==-1) goto NoSuchObject;
@@ -84,8 +84,8 @@ void DebugMoveObj(void)
 	return;
 
 NoSuchObject:
-	sprintf(debug_line, "No such object as \"%s\"", a);
-	DebugMessageBox("Object Name", debug_line);
+	sprintf(debug_hugoline, "No such object as \"%s\"", a);
+	DebugMessageBox("Object Name", debug_hugoline);
 }
 
 
@@ -94,7 +94,7 @@ NoSuchObject:
 	Called by DrawTree(), below.
 */
 
-/* ContinueBranch determines the appropriate type of branch line for an 
+/* ContinueBranch determines the appropriate type of branch hugoline for an 
    object tree depending on whether the given branch continues onward from
    obj.  The current parameter is either 1 or 0, depending on whether the
    choice in question is regarding the current branch or the continuation
@@ -129,7 +129,7 @@ void DrawBranch(int obj)
 	int i, j, lastobj;
 
 #if !defined (NO_WINDOW_PROMPTS)
-	if (++tree_lines%(D_SCREENHEIGHT-1)==0)
+	if (++tree_hugolines%(D_SCREENHEIGHT-1)==0)
 	{
 		debug_windowbottomrow("Enter to continue, Escape to quit");
 
@@ -144,8 +144,8 @@ void DrawBranch(int obj)
 	debug_settextcolor(color[NORMAL_TEXT]);
 	debug_setbackcolor(color[NORMAL_BACK]);
 
-	/* Scroll the window up a line if necessary */
-	if (tree_lines>=D_SCREENHEIGHT-1)
+	/* Scroll the window up a hugoline if necessary */
+	if (tree_hugolines>=D_SCREENHEIGHT-1)
 	{
 		debug_windowscroll(1, 1, D_SCREENWIDTH, D_SCREENHEIGHT-1, UP, 1);
 		debug_settextpos(1, D_SCREENHEIGHT-1);
@@ -163,20 +163,20 @@ void DrawBranch(int obj)
 			for (j=1; j<tree_nest-i; j++)
 				lastobj = Parent(lastobj);
 				
-			sprintf(debug_line, "%c   ", (Sibling(lastobj) || Parent(lastobj)==0)
+			sprintf(debug_hugoline, "%c   ", (Sibling(lastobj) || Parent(lastobj)==0)
 						? ContinueBranch(lastobj, 0):' ');
-			debug_print(debug_line);
+			debug_print(debug_hugoline);
 		}
 
-		sprintf(debug_line, "%c%c%c%c", ContinueBranch(obj, 1),
+		sprintf(debug_hugoline, "%c%c%c%c", ContinueBranch(obj, 1),
 			HORIZONTAL_LINE, HORIZONTAL_LINE, HORIZONTAL_LINE);
 	}
-	else strcpy(debug_line, "");
+	else strcpy(debug_hugoline, "");
 
 	/* ...before printing the object name... */
 
-	strcat(debug_line, objectname[obj]);
-	debug_print(debug_line);
+	strcat(debug_hugoline, objectname[obj]);
+	debug_print(debug_hugoline);
 	debug_print("\n");
 
 	/* ...and recurse into its children (if any) */
@@ -225,11 +225,11 @@ void DrawTree(void)
 	/* Draw this object and all its children: */
 
 	debug_settextpos(1, 1);
-	sprintf(debug_line, "%s\n", objectname[obj]);
-	debug_print(debug_line);
+	sprintf(debug_hugoline, "%s\n", objectname[obj]);
+	debug_print(debug_hugoline);
 
 	tree_nest = 0;
-	tree_lines = 0;
+	tree_hugolines = 0;
 	
 	total_leftcolumn_objects = 0;
 	for (i=0; i<objects; i++)
@@ -267,8 +267,8 @@ LeaveDrawTree:
 	return;
 
 NoSuchObject:
-	sprintf(debug_line, "No such object as \"%s\"", a);
-	DebugMessageBox("Object Name", debug_line);
+	sprintf(debug_hugoline, "No such object as \"%s\"", a);
+	DebugMessageBox("Object Name", debug_hugoline);
 }
 
 
@@ -309,8 +309,8 @@ void LoadSetupFile(void)
 
 LoadSetupError:
 	fclose(setupfile);
-	sprintf(debug_line, "Unable to load \"%s\"", setup_path);
-	DebugMessageBox("Setup File Error", debug_line);
+	sprintf(debug_hugoline, "Unable to load \"%s\"", setup_path);
+	DebugMessageBox("Setup File Error", debug_hugoline);
 
 UseDefaults:
 
@@ -393,8 +393,8 @@ CloseSetupFile:
 	fclose(setupfile);              /* close (unsuccessfully) */
 
 SaveSetupError:
-	sprintf(debug_line, "Unable to save \"%s\"", setup_path);
-	DebugMessageBox("Setup File Error", debug_line);
+	sprintf(debug_hugoline, "Unable to save \"%s\"", setup_path);
+	DebugMessageBox("Setup File Error", debug_hugoline);
 
 	return;
 }
@@ -484,7 +484,7 @@ SaveColorSet:
 	debug_settextcolor(color[NORMAL_TEXT]);
 	debug_setbackcolor(color[NORMAL_BACK]);
 	hugo_clearfullscreen();
-	buffered_code_lines = FORCE_REDRAW;	/* force Code window redraw */
+	buffered_code_hugolines = FORCE_REDRAW;	/* force Code window redraw */
 	UpdateDebugScreen();
 }
 
@@ -501,7 +501,7 @@ void SetupFilename(char *n, int f)
 	if (f==1) a = "Printer";  /* only device for now */
 	else a = "(undefined)";
 
-	sprintf(debug_line, "%s Name", a);
+	sprintf(debug_hugoline, "%s Name", a);
 
 	if (f==1) c = "Enter path or device name:";
 	else c = "(undefined)";

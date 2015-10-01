@@ -116,7 +116,7 @@ void arc_colour(unsigned char n, unsigned int c);
 
 #define MAXBUFFER 255
 
-#define HUGO_INLINE static __inline
+#define HUGO_INLINE static __inhugoline
 
 #if defined (ALLEGRO)
 #define FRONT_END
@@ -204,7 +204,7 @@ void arc_colour(unsigned char n, unsigned int c);
 
 #define MAXBUFFER 255
 /*
-#define HUGO_INLINE static __inline
+#define HUGO_INLINE static __inhugoline
 */
 #endif /* defined (GCC_UNIX) */
 
@@ -292,14 +292,14 @@ void arc_colour(unsigned char n, unsigned int c);
 			   break up paragraphs (1024+256)*/
 
 #ifndef HUGO_INLINE
-#define HUGO_INLINE __inline
+#define HUGO_INLINE __inhugoline
 #endif
 
 #define FRONT_END
 #define MINIMAL_INTERFACE
 
-int heglk_get_linelength(void);
-#define ACTUAL_LINELENGTH() heglk_get_linelength()
+int heglk_get_hugolinelength(void);
+#define ACTUAL_LINELENGTH() heglk_get_hugolinelength()
 int heglk_get_screenheight(void);
 #define ACTUAL_SCREENHEIGHT() heglk_get_screenheight()
 
@@ -327,7 +327,7 @@ void heglk_printfatalerror(char *err);
 #undef fgetc
 #define fgetc(f)	(glk_get_char_stream(f))
 #undef fgets
-#define fgets(a, n, f)	(glk_get_line_stream(f, a, n))
+#define fgets(a, n, f)	(glk_get_hugoline_stream(f, a, n))
 #undef fread
 #define fread(a,s,n,f)	(glk_get_buffer_stream(f, (char *)a, n))
 #undef fprintf
@@ -386,9 +386,9 @@ void heglk_printfatalerror(char *err);
 #define DEF_SLFCOLOR	18
 #define DEF_SLBGCOLOR	19
 
-#define MAXBUFFER	256		/* max. input/output line length */
+#define MAXBUFFER	256		/* max. input/output hugoline length */
 
-#define HUGO_INLINE __inline
+#define HUGO_INLINE __inhugoline
 
 #define NO_TERMINAL_LINEFEED
 #define MINIMAL_WINDOWING
@@ -473,12 +473,12 @@ extern FILE *hugo_fopen (char *filename, char *mode);
 
 #define DEF_FCOLOR      7               /* default colors, fore and back */
 #define DEF_BGCOLOR     0
-#define DEF_SLFCOLOR	15		/* statusline */
+#define DEF_SLFCOLOR	15		/* statushugoline */
 #define DEF_SLBGCOLOR	1
 
 #define OMIT_EXTRA_STRING_FUNCTIONS
 
-#define MAXBUFFER 255                   /* max. input/output line length */
+#define MAXBUFFER 255                   /* max. input/output hugoline length */
 
 #endif /* defined (QUICKC) */
 
@@ -531,7 +531,7 @@ extern FILE *hugo_fopen (char *filename, char *mode);
 #define MAXBUFFER 255
 #define MAXUNDO 1024
 
-#define HUGO_INLINE __inline
+#define HUGO_INLINE __inhugoline
 
 #define NO_TERMINAL_LINEFEED
 #define BUILD_RANDOM
@@ -608,7 +608,7 @@ void exit_he_thread(int n);
 #define MAXBUFFER 255
 #define MAXUNDO 1024
 
-#define HUGO_INLINE static __inline
+#define HUGO_INLINE static __inhugoline
 
 #define NO_TERMINAL_LINEFEED
 #define FRONT_END
@@ -692,7 +692,7 @@ int LoadGameData(char reload);
 #define MAXGLOBALS       240
 #define MAXLOCALS         16
 #define MAXPOBJECTS      256    /* contenders for disambiguation */
-#define MAXWORDS          32    /* in an input line              */
+#define MAXWORDS          32    /* in an input hugoline              */
 #define MAXSTACKDEPTH    256	/* for nesting {...}		 */
 
 #if !defined (MAXUNDO)
@@ -851,8 +851,8 @@ extern const int article;
 /* "display" object properties */
 extern const int screenwidth;
 extern const int screenheight;
-extern const int linelength;
-extern const int windowlines;
+extern const int hugolinelength;
+extern const int windowhugolines;
 extern const int cursor_column;
 extern const int cursor_row;
 extern const int hasgraphics;
@@ -873,7 +873,7 @@ void hugo_closefiles(void);
 void hugo_font(int f);
 void hugo_getfilename(char *a, char *b);
 int hugo_getkey(void);
-void hugo_getline(char *p);
+void hugo_gethugoline(char *p);
 void hugo_init_screen(void);
 void hugo_makepath(char *path, char *drive, char *dir, char *fname, char *ext);
 int hugo_overwrite(char *f);
@@ -1026,7 +1026,7 @@ extern long codeptr;
 extern long codeend;
 extern char pbuffer[];
 extern int currentpos;
-extern int currentline;
+extern int currenthugoline;
 extern int full;
 extern signed char fcolor, bgcolor, icolor, default_bgcolor;
 extern int currentfont;
@@ -1037,7 +1037,7 @@ extern int physical_windowwidth, physical_windowheight,
 	physical_windowtop, physical_windowleft,
 	physical_windowbottom, physical_windowright;
 extern int inwindow;
-extern int charwidth, lineheight, FIXEDCHARWIDTH, FIXEDLINEHEIGHT;
+extern int charwidth, hugolineheight, FIXEDCHARWIDTH, FIXEDLINEHEIGHT;
 extern int current_text_x, current_text_y;
 extern int undostack[][5];
 extern int undoptr;
@@ -1088,7 +1088,7 @@ int ValidObj(int obj);
 extern char buffer[];
 extern char full_buffer;
 extern char errbuf[];
-extern char line[];
+extern char hugoline[];
 extern int words; extern char *word[];
 extern unsigned int wd[], parsed_number;
 extern char parse_called_twice;

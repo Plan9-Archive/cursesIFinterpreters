@@ -202,7 +202,7 @@ int GetProp(int obj, int p, int n, char s)
 #else
 				g = SCREENHEIGHT/FIXEDLINEHEIGHT;
 #endif
-			else if (p==linelength)
+			else if (p==hugolinelength)
 /* ACTUAL_LINELENGTH functions similarly to ACTUAL_SCREENWIDTH,
    above.
 */
@@ -211,12 +211,12 @@ int GetProp(int obj, int p, int n, char s)
 #else
 				g = physical_windowwidth/FIXEDCHARWIDTH;
 #endif
-			else if (p==windowlines)
+			else if (p==windowhugolines)
 				g = physical_windowheight/FIXEDLINEHEIGHT;
 			else if (p==cursor_column)
 				g = (currentpos+1+hugo_textwidth(pbuffer))/FIXEDCHARWIDTH;
 			else if (p==cursor_row)
-				g = currentline;
+				g = currenthugoline;
 			else if (p==hasgraphics)
 				g = hugo_hasgraphics();
 			else if (p==title_caption)
@@ -329,7 +329,7 @@ GetNextProp:
 						tail_recursion_addr = (long)PeekWord(pa+2)*address_scale;
 						return 0;
 					}
-					/* ...but if we're not immediately followed by and end-of-line marker,
+					/* ...but if we're not immediately followed by and end-of-hugoline marker,
 					   or another property value, cancel the pending tail-recursion
 					*/
 					else if (MEM(codeptr)!=DECIMAL_T)
@@ -426,7 +426,7 @@ GetNextProp:
 							if (IsBreakpoint(orig_inprop))
 								complex_prop_breakpoint = true;
 							
-							sprintf(debug_line, "Calling:  %s.%s", objectname[obj], propertyname[p]);
+							sprintf(debug_hugoline, "Calling:  %s.%s", objectname[obj], propertyname[p]);
 							trace_complex_prop_routine = true;
 
 							tempdbnest = dbnest;

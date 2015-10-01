@@ -99,33 +99,33 @@ void About(void)
 	debug_setbackcolor(color[NORMAL_BACK]);
 	debug_clearview(VIEW_HELP);
 
-	sprintf(debug_line, "About the Hugo v%d.%d%s Debugger\n\n", HEVERSION, HEREVISION, HEINTERIM);
-	debug_settextpos(Center(debug_line), 1);
+	sprintf(debug_hugoline, "About the Hugo v%d.%d%s Debugger\n\n", HEVERSION, HEREVISION, HEINTERIM);
+	debug_settextpos(Center(debug_hugoline), 1);
 	debug_settextcolor(color[SELECT_TEXT]);
 	debug_setbackcolor(color[SELECT_BACK]);
-	debug_print(debug_line);
+	debug_print(debug_hugoline);
 
 	debug_settextcolor(color[NORMAL_TEXT]);
 	debug_setbackcolor(color[NORMAL_BACK]);
 
 	/* For formatting Help window text: */
-	memset(debug_line, ' ', (size_t)(l = ((window[VIEW_HELP].width-64)/2+4)));
-	debug_line[l] = '\0';
+	memset(debug_hugoline, ' ', (size_t)(l = ((window[VIEW_HELP].width-64)/2+4)));
+	debug_hugoline[l] = '\0';
 
-	debug_print(debug_line);
+	debug_print(debug_hugoline);
 	debug_print("Written by Kent Tessman\n");
-	debug_print(debug_line);
+	debug_print(debug_hugoline);
 	debug_print("Copyright (c) 1995-2006\n");
-	debug_print(debug_line);
+	debug_print(debug_hugoline);
 	debug_print("The General Coffee Company Film Productions\n\n");
-	debug_print(debug_line);
+	debug_print(debug_hugoline);
 	debug_print("(");
 	debug_print(PORT_NAME);
 	debug_print(" port by ");
 	debug_print(PORTER_NAME);
 	debug_print(")\n\n");
 
-	debug_print(debug_line);
+	debug_print(debug_hugoline);
 	debug_print("Select \"Topic\" from the Help menu, then type \"help\".\n");
 
 #if !defined (NO_WINDOW_PROMPTS)
@@ -141,7 +141,7 @@ void About(void)
 /* ALLOCMEMORY
 
 	Used in place of malloc() when it may be necessary to cannibalize
-	the memory allocated for code-line history if needed, e.g., for
+	the memory allocated for code-hugoline history if needed, e.g., for
 	saving a rectangle of screen text or adding a watch value.
 */
 
@@ -185,8 +185,8 @@ int CheckinRange(unsigned int val, unsigned int max, char *what)
 	{
 		if (val < 0 || val > max)
 		{
-			sprintf(debug_line, "%c%s out of range:  %ld", toupper(what[0]), what+1, (long)val);
-			RuntimeWarning(debug_line);
+			sprintf(debug_hugoline, "%c%s out of range:  %ld", toupper(what[0]), what+1, (long)val);
+			RuntimeWarning(debug_hugoline);
 			return false;
 		}
 	}
@@ -244,12 +244,12 @@ void DebuggerFatal(int n)
 	{
 		case D_MEMORY_ERROR:
 		{
-			strcpy(debug_line, "Out of memory");
+			strcpy(debug_hugoline, "Out of memory");
 			break;
 		}
 		case D_VERSION_ERROR:
 		{
-			sprintf(debug_line, "File must be compiled with version %d.%d", HEVERSION, HEREVISION);
+			sprintf(debug_hugoline, "File must be compiled with version %d.%d", HEVERSION, HEREVISION);
 			break;
 		}
 	}
@@ -258,7 +258,7 @@ void DebuggerFatal(int n)
 	hugo_clearfullscreen();
 
 	top = D_SCREENHEIGHT/2-3;
-	width = (strlen(debug_line)>40)?strlen(debug_line):40;
+	width = (strlen(debug_hugoline)>40)?strlen(debug_hugoline):40;
 	left = D_SCREENWIDTH/2-width/2-2;
 	right = D_SCREENWIDTH/2+width/2+2;
 
@@ -267,23 +267,23 @@ void DebuggerFatal(int n)
 	/* Tweak the borders a little to draw a shadow */
 	debug_windowshadow(left, top, right+2, top+7);
 
-	debug_settextpos(Center(debug_line), top+3);
-	debug_print(debug_line);
+	debug_settextpos(Center(debug_hugoline), top+3);
+	debug_print(debug_hugoline);
 
-	strcpy(debug_line, "DEBUGGER FATAL ERROR");
-	debug_settextpos(Center(debug_line), top+1);
-	debug_print(debug_line);
+	strcpy(debug_hugoline, "DEBUGGER FATAL ERROR");
+	debug_settextpos(Center(debug_hugoline), top+1);
+	debug_print(debug_hugoline);
 
 	debug_cursor(1);
-	strcpy(debug_line, "[Press Enter to terminate...]");
-	debug_settextpos(Center(debug_line), top+5);
-	debug_print(debug_line);
+	strcpy(debug_hugoline, "[Press Enter to terminate...]");
+	debug_settextpos(Center(debug_hugoline), top+5);
+	debug_print(debug_hugoline);
 
 	while (hugo_waitforkey()!=ENTER_KEY);
 
 	hugo_cleanup_screen();
 #else
-	DEBUGGER_PRINTFATALERROR(debug_line);
+	DEBUGGER_PRINTFATALERROR(debug_hugoline);
 #endif
 
 	exit(n);
@@ -375,7 +375,7 @@ void DeleteBreakpoint(long baddr)
 			window[VIEW_BREAKPOINTS].changed = true;
 
 			/* Force Code window redraw */
-			buffered_code_lines = FORCE_REDRAW;
+			buffered_code_hugolines = FORCE_REDRAW;
 			window[CODE_WINDOW].selected = window[CODE_WINDOW].count - 1;
 
 			UpdateDebugScreen();
@@ -394,7 +394,7 @@ void EnterBreakpoint(void)
 
 	t = "Set Breakpoint";
 
-	/* First try getting the highlighted line from the code window: */
+	/* First try getting the highlighted hugoline from the code window: */
 	if (window[CODE_WINDOW].count)
 		paddr = StealAddress(window[CODE_WINDOW].selected-window[CODE_WINDOW].first);
 
@@ -456,8 +456,8 @@ void EnterSearch(void)
 
 	debug_windowbottomrow("Searching...");
 
-	/* Skim through lines, first from the next line to
-	   the last-recorded code line
+	/* Skim through hugolines, first from the next hugoline to
+	   the last-recorded code hugoline
 	*/
 	for (l=win->selected+1; l<win->count; l++)
 	{
@@ -469,8 +469,8 @@ void EnterSearch(void)
 	}
 
 	/* If we haven't matched yet, skim from the oldest code
-	  line to the previous starting point (i.e., the current
-	  line)
+	  hugoline to the previous starting point (i.e., the current
+	  hugoline)
 	*/
 	if (!found)
 	{
@@ -488,12 +488,12 @@ void EnterSearch(void)
 
 	if (!found)
 	{
-		sprintf(debug_line, "Not found:  %s", search);
-		DebugMessageBox("Search", debug_line);
+		sprintf(debug_hugoline, "Not found:  %s", search);
+		DebugMessageBox("Search", debug_hugoline);
 		return;
 	}
 
-	/* If we get to this point, then l holds the (next) line
+	/* If we get to this point, then l holds the (next) hugoline
 	   containing the search string.
 	*/
 	strcpy(last_search, search);
@@ -602,13 +602,13 @@ void LoadDebuggableFile(void)
 	{
 		hugo_clearfullscreen();
 		hugo_cleanup_screen();
-		sprintf(debug_line, "File \"%s\" not compiled as .HDX file.\n", gamefile);
-		sprintf(debug_line+strlen(debug_line), "(Use -d switch during compilation.)\n");
+		sprintf(debug_hugoline, "File \"%s\" not compiled as .HDX file.\n", gamefile);
+		sprintf(debug_hugoline+strlen(debug_hugoline), "(Use -d switch during compilation.)\n");
 
 #if defined (DEBUGGER_PRINTFATALERROR)
-		DEBUGGER_PRINTFATALERROR(debug_line);
+		DEBUGGER_PRINTFATALERROR(debug_hugoline);
 #else
-		printf(debug_line);
+		printf(debug_hugoline);
 #endif
 		
 		exit(READ_E);                           /* unable to read */
@@ -702,7 +702,7 @@ void LoadDebuggableFile(void)
 
 	/* Reserve space for window information: */
 
-	if ((codeline = malloc((size_t)MAX_CODE_LINES*sizeof(int *)))==NULL)
+	if ((codehugoline = malloc((size_t)MAX_CODE_LINES*sizeof(int *)))==NULL)
 		FatalError(MEMORY_E);
 }
 
@@ -823,18 +823,18 @@ void RecoverLastGood(void)
 
 	i = window[CODE_WINDOW].count;
 	c = i - window[CODE_WINDOW].selected;
-	free(codeline[--i]);
+	free(codehugoline[--i]);
 
 	if (!runtime_error)
 	{
-		while((i>0) && (codeline[i-1][0]&0xFF)!='0')
-			free(codeline[--i]);
+		while((i>0) && (codehugoline[i-1][0]&0xFF)!='0')
+			free(codehugoline[--i]);
 	}
 
 	window[CODE_WINDOW].count = i;
 	window[CODE_WINDOW].selected = i-c;
 
-	buffered_code_lines = FORCE_REDRAW;
+	buffered_code_hugolines = FORCE_REDRAW;
 
 	/* lost track of calls */
 	window[VIEW_CALLS].count = 0;
@@ -959,7 +959,7 @@ int SearchHelp(char *search_topic)
 	char drive[MAXDRIVE], dir[MAXDIR], fname[MAXFILENAME], ext[MAXEXT];
 	char help_path[MAXPATH];
 	char *t, topic[33], compare_topic[33];
-	int i, l, linecount;
+	int i, l, hugolinecount;
 	FILE *helpfile = NULL;
 
 	if (in_help_mode) return false;
@@ -985,8 +985,8 @@ int SearchHelp(char *search_topic)
 
 	if ((helpfile = fopen(help_path, "rb"))==NULL)
 	{
-		sprintf(debug_line, "Unable to load help file:  %s", HELP_FILE);
-		DebugMessageBox(t, debug_line);
+		sprintf(debug_hugoline, "Unable to load help file:  %s", HELP_FILE);
+		DebugMessageBox(t, debug_hugoline);
 		goto ReturnFalse;
 	}
 
@@ -998,34 +998,34 @@ int SearchHelp(char *search_topic)
 
 	while (!feof(helpfile))
 	{
-		if (fgets(debug_line, MAXBUFFER, helpfile)==NULL) goto HelpError;
+		if (fgets(debug_hugoline, MAXBUFFER, helpfile)==NULL) goto HelpError;
 
-		if (!STRICMP(debug_line, "$end\n")) break;
+		if (!STRICMP(debug_hugoline, "$end\n")) break;
 
 		/* Lines of keywords are in quotation marks--check for
 		   a match against the topic
 		*/
-		else if (debug_line[0]=='\"')
+		else if (debug_hugoline[0]=='\"')
 		{
 			/* First off, change the last quote to a space */
-			debug_line[strlen(debug_line)+1] = '\0';
-			debug_line[strlen(debug_line)-1] = ' ';
+			debug_hugoline[strlen(debug_hugoline)+1] = '\0';
+			debug_hugoline[strlen(debug_hugoline)-1] = ' ';
 
 			/* Check if a match is found */
 			l = 0;
-			for (i=0; (size_t)i<strlen(debug_line)-strlen(topic); i++)
+			for (i=0; (size_t)i<strlen(debug_hugoline)-strlen(topic); i++)
 			{
-				if (strlen(debug_line) < strlen(topic) || strlen(topic) > 32)
+				if (strlen(debug_hugoline) < strlen(topic) || strlen(topic) > 32)
 					break;
 
 				/* The first word begins at 1, since 0 is
 				   the opening '"' */
 				if (i > 1)
 					/* Find the start of the next word */
-					while (debug_line[i++]!=' ')
-						if (debug_line[i]=='\0') break;
+					while (debug_hugoline[i++]!=' ')
+						if (debug_hugoline[i]=='\0') break;
 
-				strncpy(compare_topic, debug_line+i, strlen(topic));
+				strncpy(compare_topic, debug_hugoline+i, strlen(topic));
 				compare_topic[strlen(topic)] = '\0';
 				if (!STRICMP(topic, compare_topic))
 				{
@@ -1043,38 +1043,38 @@ int SearchHelp(char *search_topic)
 					goto HelpError;
 				help_path[strlen(help_path)-1] = '\0';
 
-				sprintf(debug_line, "Help on \"%s\"\n", help_path);
-				debug_settextpos(Center(debug_line), 1);
+				sprintf(debug_hugoline, "Help on \"%s\"\n", help_path);
+				debug_settextpos(Center(debug_hugoline), 1);
 				debug_settextcolor(color[SELECT_TEXT]);
 				debug_setbackcolor(color[SELECT_BACK]);
-				debug_print(debug_line);
-				linecount = 2;
+				debug_print(debug_hugoline);
+				hugolinecount = 2;
 
 GetAnotherLine:
-				/* Help file lines are a maximum of 64 characters
+				/* Help file hugolines are a maximum of 64 characters
 				   long; this is to center them in the Help
 				   window:
 				*/
-				memset(debug_line, ' ', (size_t)(l = ((window[VIEW_HELP].width-64)/2)));
+				memset(debug_hugoline, ' ', (size_t)(l = ((window[VIEW_HELP].width-64)/2)));
 
 				do
 				{
-					if (fgets(debug_line+l, MAXBUFFER, helpfile)==NULL)
+					if (fgets(debug_hugoline+l, MAXBUFFER, helpfile)==NULL)
 						goto HelpError;
 				}
-				while (linecount==0 && debug_line[l]=='\n');
+				while (hugolinecount==0 && debug_hugoline[l]=='\n');
 
-				/* If the line doesn't start with a helpfile
+				/* If the hugoline doesn't start with a helpfile
 				   control character, it must be printed help
 				   text
 				*/
-				if (debug_line[l]!='\"' && debug_line[l]!='$' && debug_line[l]!='#')
+				if (debug_hugoline[l]!='\"' && debug_hugoline[l]!='$' && debug_hugoline[l]!='#')
 				{
 					debug_settextcolor(color[NORMAL_TEXT]);
 					debug_setbackcolor(color[NORMAL_BACK]);
-					debug_print(debug_line);
+					debug_print(debug_hugoline);
 #if !defined (NO_WINDOW_PROMPTS)
-					if (++linecount >= D_SCREENHEIGHT)
+					if (++hugolinecount >= D_SCREENHEIGHT)
 					{
 						debug_windowbottomrow("Enter to continue, Escape to quit");
 						debug_settextcolor(color[NORMAL_TEXT]);
@@ -1089,7 +1089,7 @@ GetAnotherLine:
 						hugo_clearfullscreen();
 						debug_windowbottomrow("");
 						debug_settextpos(1, 1);
-						linecount = 0;
+						hugolinecount = 0;
 					}
 #endif
 					goto GetAnotherLine;
@@ -1119,8 +1119,8 @@ ReturnTrue:
 		}
 	}
 
-	sprintf(debug_line, "Unable to find topic:  %s", topic);
-	DebugMessageBox(t, debug_line);
+	sprintf(debug_hugoline, "Unable to find topic:  %s", topic);
+	DebugMessageBox(t, debug_hugoline);
 	goto ReturnFalse;
 
 HelpError:
@@ -1141,7 +1141,7 @@ int SearchLineFor(int ln, char *a)
 {
 	int i, len, start, nomatch = true;
 
-	if ((len = int_strlen(codeline[ln])) < (int)strlen(a)) return false;
+	if ((len = int_strlen(codehugoline[ln])) < (int)strlen(a)) return false;
 
 	len-=strlen(a);
 
@@ -1150,7 +1150,7 @@ int SearchLineFor(int ln, char *a)
 		nomatch = 0;
 		for (i=0; i<(int)strlen(a); i++)
 		{
-			if (toupper((int)(codeline[ln][i+start]&0xFF))!=toupper(a[i]))
+			if (toupper((int)(codehugoline[ln][i+start]&0xFF))!=toupper(a[i]))
 			{
 				nomatch = true;
 				continue;
@@ -1206,8 +1206,8 @@ void SetBreakpoint(long addr)
 
 	if (window[VIEW_BREAKPOINTS].count==MAXBREAKPOINTS)
 	{
-		sprintf(debug_line, "Maximum of %d breakpoints", MAXBREAKPOINTS);
-		DebugMessageBox("Set Breakpoint", debug_line);
+		sprintf(debug_hugoline, "Maximum of %d breakpoints", MAXBREAKPOINTS);
+		DebugMessageBox("Set Breakpoint", debug_hugoline);
 		return;
 	}
 
@@ -1236,7 +1236,7 @@ void SetBreakpoint(long addr)
 /* STEALADDRESS
 
 	Attempts in a backwards manner to get the address at the start of
-	the given line in the Code window.  Returns false if it doesn't
+	the given hugoline in the Code window.  Returns false if it doesn't
 	start with an address.
 */
 
@@ -1250,12 +1250,12 @@ long StealAddress(int l)
 		return 0;
 
 	/* not even a potential address */
-	if (((!window[CODE_WINDOW].count) || (codeline[l][0]&0xFF)=='\0') || int_strlen(codeline[l])<6)
+	if (((!window[CODE_WINDOW].count) || (codehugoline[l][0]&0xFF)=='\0') || int_strlen(codehugoline[l])<6)
 		return 0;
 
 	for (i=0; i<=5; i++)
-		debug_line[i] = (unsigned char)(codeline[l][i]&0xFF);
-	debug_line[6] = '\0';
+		debug_hugoline[i] = (unsigned char)(codehugoline[l][i]&0xFF);
+	debug_hugoline[6] = '\0';
 
-	return HextoDec(debug_line);
+	return HextoDec(debug_hugoline);
 }

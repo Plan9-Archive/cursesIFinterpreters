@@ -47,7 +47,7 @@ int hc_main(int argc, char *argv[])
 
 	if (argc==1) Banner(stdout, "");
 
-	ParseCommand(argc, argv);       /* Parse command line, then open */
+	ParseCommand(argc, argv);       /* Parse command hugoline, then open */
 	OpenFiles();			/*   files upon returning.	 */
 
 	if (listing && !spellcheck) Banner(listfile, listfilename);

@@ -97,9 +97,9 @@ long codeptr;                           /* code pointer            */
 long codeend;                           /* end of loaded code      */
 
 /* Text output */
-char pbuffer[MAXBUFFER*2+1];            /* print buffer for line-wrapping  */
+char pbuffer[MAXBUFFER*2+1];            /* print buffer for hugoline-wrapping  */
 int currentpos = 0;                     /* column position (pixel or char) */
-int currentline = 0;                    /* row number (line)               */
+int currenthugoline = 0;                    /* row number (hugoline)               */
 int full = 0;                           /* page counter for PromptMore     */
 signed char fcolor = 16,		/* default fore/background colors  */
 	bgcolor = 17,			/* (16 = default foreground,	   */
@@ -115,7 +115,7 @@ int physical_windowwidth,		/* "physical_..." measurements	   */
 	physical_windowtop, physical_windowleft,
 	physical_windowbottom, physical_windowright;
 int inwindow = 0;
-int charwidth, lineheight, FIXEDCHARWIDTH, FIXEDLINEHEIGHT;
+int charwidth, hugolineheight, FIXEDCHARWIDTH, FIXEDLINEHEIGHT;
 int current_text_x = 0, current_text_y = 0;
 
 #ifdef USE_SMARTFORMATTING
@@ -143,15 +143,15 @@ static int bufferbreak = 0, bufferbreaklen = 0;
 
 void AP (char *a)
 {
-	char sticky = false, skipspchar = false, startofline = 0;
+	char sticky = false, skipspchar = false, startofhugoline = 0;
 	int i, alen, plen, cwidth;
 	char c = 0;			/* current character */
 	char lastc = 0;			/* for smart formatting */
 
 	static int lastfcolor = 16, lastbgcolor = 17;
 	static int lastfont = NORMAL_FONT;
-	static int thisline = 0;	/* width in pixels or characters */
-	static int linebreaklen = 0, linebreak = 0;
+	static int thishugoline = 0;	/* width in pixels or characters */
+	static int hugolinebreaklen = 0, hugolinebreak = 0;
 	int tempfont;
 	char printed_something = false;
 #ifdef USE_TEXTBUFFER
@@ -180,11 +180,11 @@ void AP (char *a)
 	plen = strlen(pbuffer);
 	if (plen==0)
 	{
-		thisline = 0;
-		linebreak = 0;
-		linebreaklen = 0;
+		thishugoline = 0;
+		hugolinebreak = 0;
+		hugolinebreaklen = 0;
 		lastfont = currentfont;
-		startofline = true;
+		startofhugoline = true;
 #ifdef USE_TEXTBUFFER
 		bufferbreak = 0;
 		bufferbreaklen = 0;
@@ -195,7 +195,7 @@ void AP (char *a)
 	}
 
 	/* Check for color changes */
-	if ((a[0]) && (lastfcolor!=fcolor || lastbgcolor!=bgcolor || startofline))
+	if ((a[0]) && (lastfcolor!=fcolor || lastbgcolor!=bgcolor || startofhugoline))
 	{
 		if (plen >= MAXBUFFER*2-3) FatalError(OVERFLOW_E);
 		pbuffer[plen++] = COLOR_CHANGE;
@@ -208,7 +208,7 @@ void AP (char *a)
 
 	/* Check for font changes--since fonts can only get changed
 	   by printing, we don't check lastfont */
-	if ((a[0]) && startofline)
+	if ((a[0]) && startofhugoline)
 	{
 		if (plen >= MAXBUFFER*2-2) FatalError(OVERFLOW_E);
 		pbuffer[plen++] = FONT_CHANGE;
@@ -234,7 +234,7 @@ void AP (char *a)
 		c = a[i];
 		
 		/* Left-justification */
-		if (thisline==0 && c==' ' && !textto && currentpos==0)
+		if (thishugoline==0 && c==' ' && !textto && currentpos==0)
 			continue;
 
 		/* First check control characters */
@@ -326,12 +326,12 @@ AddFontCode:
 
 						/* Convert full if font height changes, since
 						   the amount of used screen real estate for
-						   this particular font (in terms of lines)
+						   this particular font (in terms of hugolines)
 						   will have changed:
 						*/
-						ratio = (double)lineheight;
+						ratio = (double)hugolineheight;
 						hugo_font(currentfont);
-						ratio /= (double)lineheight;
+						ratio /= (double)hugolineheight;
 						newfull = (int)(((double)full)*ratio+0.5);
 						if (newfull) full = newfull;
 					}
@@ -386,7 +386,7 @@ AddFontCode:
 
 		printed_something = true;
 
-		/* Handle in-text newlines */
+		/* Handle in-text newhugolines */
 		if (c=='\n')
 		{
 			hugo_font(currentfont = lastfont);
@@ -394,8 +394,8 @@ AddFontCode:
 			TB_AddWord(pbuffer+bufferbreak,
 				current_text_x+bufferbreaklen,
 				current_text_y,
-				current_text_x+thisline-1,
-				current_text_y+lineheight-1);
+				current_text_x+thishugoline-1,
+				current_text_y+hugolineheight-1);
 #endif
 			Printout(pbuffer);
 			lastfont = currentfont;
@@ -406,9 +406,9 @@ AddFontCode:
 #endif
 			strcpy(pbuffer, "");
 			plen = 0;
-			linebreak = 0;
-			linebreaklen = 0;
-			thisline = 0;
+			hugolinebreak = 0;
+			hugolinebreaklen = 0;
+			thishugoline = 0;
 #ifdef USE_SMARTFORMATTING
 			leftquote = true;
 #endif
@@ -470,20 +470,20 @@ AddFontCode:
 
 		cwidth = hugo_charwidth(c);
 
-	/* Check to see if we've overrun the current line */
+	/* Check to see if we've overrun the current hugoline */
 
-		if (thisline+cwidth+currentpos > physical_windowwidth)
+		if (thishugoline+cwidth+currentpos > physical_windowwidth)
 		{
 			char t;
 
-			if (!linebreak)
+			if (!hugolinebreak)
 			{
-				linebreak = plen-1;
-				linebreaklen = thisline;
+				hugolinebreak = plen-1;
+				hugolinebreaklen = thishugoline;
 			}
 
-			t = pbuffer[linebreak];
-			pbuffer[linebreak] = '\0';
+			t = pbuffer[hugolinebreak];
+			pbuffer[hugolinebreak] = '\0';
 
 			tempfont = currentfont;
 			hugo_font(currentfont = lastfont);
@@ -491,20 +491,20 @@ AddFontCode:
 			lastfont = currentfont;
 			hugo_font(currentfont = tempfont);
 
-			pbuffer[linebreak] = t;
-			strcpy(pbuffer, pbuffer+linebreak);
+			pbuffer[hugolinebreak] = t;
+			strcpy(pbuffer, pbuffer+hugolinebreak);
 			plen = strlen(pbuffer);
-			thisline = thisline - linebreaklen;
-			linebreak = 0;
-			linebreaklen = 0;
-			startofline = 0;
+			thishugoline = thishugoline - hugolinebreaklen;
+			hugolinebreak = 0;
+			hugolinebreaklen = 0;
+			startofhugoline = 0;
 #ifdef USE_TEXTBUFFER
 			bufferbreak = 0;
 			bufferbreaklen = 0;
 #endif
 		}
 
-		thisline += cwidth;
+		thishugoline += cwidth;
 
 #ifdef USE_TEXTBUFFER
 		if ((c==' ' || c==FORCED_SPACE) ||
@@ -513,17 +513,17 @@ AddFontCode:
 			TB_AddWord(pbuffer+bufferbreak,
 				current_text_x+bufferbreaklen,
 				current_text_y,
-				current_text_x+thisline-1,
-				current_text_y+lineheight-1);
+				current_text_x+thishugoline-1,
+				current_text_y+hugolineheight-1);
 
 			bufferbreak = plen;
-			bufferbreaklen = thisline;
+			bufferbreaklen = thishugoline;
 			bufferfont = currentfont;
 		}
 #endif
 		if ((c==' ') || (c=='/' && a[i+1]!='/') || (c=='-' && a[i+1]!='-'))
 		{
-			linebreak = plen, linebreaklen = thisline;
+			hugolinebreak = plen, hugolinebreaklen = thishugoline;
 		}
 	}
 
@@ -536,11 +536,11 @@ AddFontCode:
 		TB_AddWord(pbuffer+bufferbreak,
 			current_text_x+bufferbreaklen,
 			current_text_y,
-			current_text_x+thisline-1,
-			current_text_y+lineheight-1);
+			current_text_x+thishugoline-1,
+			current_text_y+hugolineheight-1);
 
 		bufferbreak = plen;
-		bufferbreaklen = thisline;
+		bufferbreaklen = thishugoline;
 		currentfont = tempfont;
 	}
 #endif
@@ -550,9 +550,9 @@ AddFontCode:
 		Printout(pbuffer);
 		lastfont = currentfont;
 		strcpy(pbuffer, "");
-		linebreak = 0;
-		linebreaklen = 0;
-		thisline = 0;
+		hugolinebreak = 0;
+		hugolinebreaklen = 0;
+		thishugoline = 0;
 		plen = 0;
 #ifdef USE_TEXTBUFFER
 		bufferbreak = 0;
@@ -620,7 +620,7 @@ int CallRoutine(unsigned int addr)
 		PassLocals(arg);
 		return 0;
 	}
-	/* ...but if we're not immediately followed by and end-of-line marker,
+	/* ...but if we're not immediately followed by and end-of-hugoline marker,
 	   cancel the pending tail-recursion
 	*/
 	else
@@ -709,7 +709,7 @@ unsigned int Dict()
 	codeptr += 2;                           /* "(" */
 
 	if (MEM(codeptr)==PARSE_T || MEM(codeptr)==WORD_T)
-		strcpy(line, GetWord(GetValue()));
+		strcpy(hugoline, GetWord(GetValue()));
 	else
 	{
 		/* Get the array address to read the to-be-
@@ -730,15 +730,15 @@ unsigned int Dict()
 
 		defseg = arraytable;
 		for (i=0; i<len && PeekWord(arr+i*2)!=0; i++)
-			line[i] = (char)PeekWord(arr+i*2);
+			hugoline[i] = (char)PeekWord(arr+i*2);
 		defseg = gameseg;
-		line[i] = '\0';
+		hugoline[i] = '\0';
 	}
 
 	if (Peek(codeptr)==COMMA_T) codeptr++;
 	len = GetValue();
 
-	if ((loc = FindWord(line))!=UNKNOWN_WORD) return loc;
+	if ((loc = FindWord(hugoline))!=UNKNOWN_WORD) return loc;
 
 	defseg = dicttable;
 
@@ -747,24 +747,24 @@ unsigned int Dict()
 
 	loc = pos - 2;
 	
-	if ((long)(pos+strlen(line)) > (long)(codeend-dicttable*16L))
+	if ((long)(pos+strlen(hugoline)) > (long)(codeend-dicttable*16L))
 	{
 #ifdef DEBUGGER
-		sprintf(debug_line, "$MAXDICTEXTEND dictionary space exceeded");
-		RuntimeWarning(debug_line);
+		sprintf(debug_hugoline, "$MAXDICTEXTEND dictionary space exceeded");
+		RuntimeWarning(debug_hugoline);
 #endif
 		defseg = gameseg;
 		return 0;
 	}
 
-	Poke(pos++, (unsigned char)strlen(line));
-	for (i=0; i<(int)strlen(line) && i<len; i++)
-		Poke(pos++, (unsigned char)(line[i]+CHAR_TRANSLATION));
+	Poke(pos++, (unsigned char)strlen(hugoline));
+	for (i=0; i<(int)strlen(hugoline) && i<len; i++)
+		Poke(pos++, (unsigned char)(hugoline[i]+CHAR_TRANSLATION));
 	PokeWord(0, ++dictcount);
 
 	defseg = gameseg;
 
-	SaveUndo(DICT_T, strlen(line), 0, 0, 0);
+	SaveUndo(DICT_T, strlen(hugoline), 0, 0, 0);
 
 	return loc;
 }
@@ -774,7 +774,7 @@ unsigned int Dict()
 
 void FatalError(int n)
 {
-	char fatalerrorline[64];
+	char fatalerrorhugoline[64];
 
 #if defined (DEBUGGER)
 	hugo_stopmusic();
@@ -792,39 +792,39 @@ void FatalError(int n)
 	switch (n)
 	{
 		case MEMORY_E:
-			{sprintf(line, "Out of memory\n");
+			{sprintf(hugoline, "Out of memory\n");
 			break;}
 
 		case OPEN_E:
-			{sprintf(line, "Cannot open file\n");
+			{sprintf(hugoline, "Cannot open file\n");
 			break;}
 
 		case READ_E:
-			{sprintf(line, "Cannot read from file\n");
+			{sprintf(hugoline, "Cannot read from file\n");
 			break;}
 
 		case WRITE_E:
-			{sprintf(line, "Cannot write to save file\n");
+			{sprintf(hugoline, "Cannot write to save file\n");
 			break;}
 
 		case EXPECT_VAL_E:
-			{sprintf(line, "Expecting value at $%s\n", PrintHex(codeptr));
+			{sprintf(hugoline, "Expecting value at $%s\n", PrintHex(codeptr));
 			break;}
 
 		case UNKNOWN_OP_E:
-			{sprintf(line, "Unknown operation at $%s\n", PrintHex(codeptr));
+			{sprintf(hugoline, "Unknown operation at $%s\n", PrintHex(codeptr));
 			break;}
 
 		case ILLEGAL_OP_E:
-			{sprintf(line, "Illegal operation at $%s\n", PrintHex(codeptr));
+			{sprintf(hugoline, "Illegal operation at $%s\n", PrintHex(codeptr));
 			break;}
 
 		case OVERFLOW_E:
-			{sprintf(line, "Overflow at $%s\n", PrintHex(codeptr));
+			{sprintf(hugoline, "Overflow at $%s\n", PrintHex(codeptr));
 			break;}
 
 		case DIVIDE_E:
-			{sprintf(line, "Divide by zero at $%s\n", PrintHex(codeptr));
+			{sprintf(hugoline, "Divide by zero at $%s\n", PrintHex(codeptr));
 			break;}
 	}
 
@@ -836,7 +836,7 @@ void FatalError(int n)
 
 		if (n==MEMORY_E) DebuggerFatal(D_MEMORY_ERROR);
 
-		RuntimeWarning(line);
+		RuntimeWarning(hugoline);
 		debugger_interrupt = true;
 		debugger_skip = true;
 		runtime_error = true;
@@ -871,8 +871,8 @@ if (n==UNKNOWN_OP_E || n==ILLEGAL_OP_E || n==EXPECT_VAL_E || n==OVERFLOW_E)
 	fprintf(stderr, "\n");
 }
 */
-	sprintf(fatalerrorline, "\nFatal Error:  %s", line);
-	PRINTFATALERROR(fatalerrorline);
+	sprintf(fatalerrorhugoline, "\nFatal Error:  %s", hugoline);
+	PRINTFATALERROR(fatalerrorhugoline);
 
 	hugo_closefiles();
 	hugo_blockfree(mem);
@@ -906,12 +906,12 @@ void FileIO(void)
 	ioerror = 0;
 	
 	/* Make sure the filename is legal, 8 alphanumeric characters or less */
-	strcpy(line, GetWord(fnameval));
-	if (strlen(line) > 8) goto LeaveFileIO;
-	for (i=0; i<(int)strlen(line); i++)
+	strcpy(hugoline, GetWord(fnameval));
+	if (strlen(hugoline) > 8) goto LeaveFileIO;
+	for (i=0; i<(int)strlen(hugoline); i++)
 	{
-		if ((line[i]>='0' && line[i]<='9') || (line[i]>='A' && line[i]<='Z') ||
-			(line[i]>='a' && line[i]<='z'))
+		if ((hugoline[i]>='0' && hugoline[i]<='9') || (hugoline[i]>='A' && hugoline[i]<='Z') ||
+			(hugoline[i]>='a' && hugoline[i]<='z'))
 		{
 			continue;
 		}
@@ -1005,7 +1005,7 @@ void Flushpbuffer()
 			current_text_x+bufferbreaklen,
 			current_text_y,
 			current_text_x+bufferbreaklen+FIXEDCHARWIDTH,
-			current_text_y+lineheight-1);
+			current_text_y+hugolineheight-1);
 	}
 #endif
 
@@ -1041,11 +1041,11 @@ void GetCommand(void)
 	y = current_text_y;
 	width = hugo_textwidth(GetWord(var[prompt]));
 	TB_AddWord(GetWord(var[prompt]), physical_windowleft, y,
-		physical_windowleft+width, y+lineheight-1);
+		physical_windowleft+width, y+hugolineheight-1);
 
-	hugo_getline(a);
+	hugo_gethugoline(a);
 	
-	/* If hugo_scrollwindowup() called by hugo_getline() shifted things */
+	/* If hugo_scrollwindowup() called by hugo_gethugoline() shifted things */
 	if (current_text_y > y)
 	{
 		y += (current_text_y - y);
@@ -1058,7 +1058,7 @@ void GetCommand(void)
 		if (buffer[i]==' ')
 		{
 			buffer[i] = '\0';
-			TB_AddWord(buffer+start, physical_windowleft+width, y-lineheight, 
+			TB_AddWord(buffer+start, physical_windowleft+width, y-hugolineheight, 
 				physical_windowleft+width+hugo_textwidth(buffer+start), y-1);
 			width += hugo_textwidth(buffer+start) + hugo_textwidth(" ");
 			start = i+1;
@@ -1066,10 +1066,10 @@ void GetCommand(void)
 		}
 	}
 	/* Add the final word */
-	TB_AddWord(buffer+start, physical_windowleft+width, y-lineheight, 
+	TB_AddWord(buffer+start, physical_windowleft+width, y-hugolineheight, 
 		physical_windowleft+width+hugo_textwidth(buffer+start), y-1);
 #else
-	hugo_getline(a);
+	hugo_gethugoline(a);
 #endif
 	during_player_input = false;
 	strcpy(buffer, Rtrim(buffer));
@@ -1206,11 +1206,11 @@ void HandleTailRecursion(long addr)
 	call[window[VIEW_CALLS].count-1].addr = currentroutine;
 	call[window[VIEW_CALLS].count-1].param = true;
 
-	sprintf(debug_line, "Calling:  %s", RoutineName(currentroutine));
-	/* Don't duplicate blank separator line in code window */
-	if (codeline[window[CODE_WINDOW].count-1][0] != 0)
+	sprintf(debug_hugoline, "Calling:  %s", RoutineName(currentroutine));
+	/* Don't duplicate blank separator hugoline in code window */
+	if (codehugoline[window[CODE_WINDOW].count-1][0] != 0)
 		AddStringtoCodeWindow("");
-	AddStringtoCodeWindow(debug_line);
+	AddStringtoCodeWindow(debug_hugoline);
 
 	/* Adjust for very long runs */
 	dbnest--;
@@ -1333,14 +1333,14 @@ void LoadGame(void)
 		hugo_cleanup_screen();
 		hugo_clearfullscreen();
 #endif
-		sprintf(line, "Hugo Compiler v%d.%d or later required.\n", HEVERSION, HEREVISION);
+		sprintf(hugoline, "Hugo Compiler v%d.%d or later required.\n", HEVERSION, HEREVISION);
 		if (game_version>0)
-			sprintf(line+strlen(line), "File \"%s\" is v%d.%d.\n", gamefile, game_version/10, game_version%10);
+			sprintf(hugoline+strlen(hugoline), "File \"%s\" is v%d.%d.\n", gamefile, game_version/10, game_version%10);
 
 #if defined (DEBUGGER_PRINTFATALERROR)
-		DEBUGGER_PRINTFATALERROR(line);
+		DEBUGGER_PRINTFATALERROR(hugoline);
 #else
-		printf(line);
+		printf(hugoline);
 #endif
 		hugo_closefiles();
 		hugo_blockfree(mem);
@@ -1354,12 +1354,12 @@ void LoadGame(void)
 		hugo_cleanup_screen();
 		hugo_clearfullscreen();
 #endif
-		sprintf(line, "File \"%s\" is incorrect or unknown version.\n", gamefile);
+		sprintf(hugoline, "File \"%s\" is incorrect or unknown version.\n", gamefile);
 
 #if defined (DEBUGGER_PRINTFATALERROR)
-		DEBUGGER_PRINTFATALERROR(line);
+		DEBUGGER_PRINTFATALERROR(hugoline);
 #else
-		printf(line);
+		printf(hugoline);
 #endif
 		hugo_closefiles();
 		hugo_blockfree(mem);
@@ -1367,7 +1367,7 @@ void LoadGame(void)
 		exit(OPEN_E);           /* ditto */
 	}
 
-	hugo_settextpos(1, physical_windowheight/lineheight);
+	hugo_settextpos(1, physical_windowheight/hugolineheight);
 
 	if (game_version>=25)
 		fseek(game, H_TEXTBANK, SEEK_SET);
@@ -1493,9 +1493,9 @@ void LoadGame(void)
 		defseg = syntable;
 		if (Peek(synptr)==3)	/* 3 = punctuation */
 		{
-			strcpy(line, GetWord(PeekWord(synptr+1)));
-			if (strlen(line) + strlen(punc_string) > 63) break;
-			strcat(punc_string, line);
+			strcpy(hugoline, GetWord(PeekWord(synptr+1)));
+			if (strlen(hugoline) + strlen(punc_string) > 63) break;
+			strcat(punc_string, hugoline);
 		}
 		synptr+=5;
 	}
@@ -1647,16 +1647,16 @@ void Printout(char *a)
 	int last_printed_font = currentfont;
 
 	/* hugo_font() should do this if necessary, but just in case */
-	if (lineheight < FIXEDLINEHEIGHT)
-		lineheight = FIXEDLINEHEIGHT;
+	if (hugolineheight < FIXEDLINEHEIGHT)
+		hugolineheight = FIXEDLINEHEIGHT;
 	
 	tempfcolor = fcolor;
 
-	/* The before-check of the linecount: */
+	/* The before-check of the hugolinecount: */
 	if (full)
 	{
 		/* -1 here since it's before printing */
-		if (full >= physical_windowheight/lineheight-1)
+		if (full >= physical_windowheight/hugolineheight-1)
 			PromptMore();
 	}
 
@@ -1710,9 +1710,9 @@ void Printout(char *a)
 				/* A minor adjustment for font changes and RunWindow() to make
 				   sure we're not printing unnecessarily downscreen
 				*/
-				if ((just_left_window) && current_text_y > physical_windowbottom-lineheight)
+				if ((just_left_window) && current_text_y > physical_windowbottom-hugolineheight)
 				{
-					current_text_y = physical_windowbottom-lineheight;
+					current_text_y = physical_windowbottom-hugolineheight;
 				}
 				just_left_window = false;
 
@@ -1747,7 +1747,7 @@ void Printout(char *a)
 #endif
 	}
 
-	/* If we've got a linefeed and didn't hit the right edge of the
+	/* If we've got a hugolinefeed and didn't hit the right edge of the
 	   window
 	*/
 #ifdef NO_TERMINAL_LINEFEED
@@ -1757,11 +1757,11 @@ void Printout(char *a)
 #endif
 	{
 		/* The background color may have to be temporarily set if we're
-		   not in a window--the reason is that full lines of the
+		   not in a window--the reason is that full hugolines of the
 		   current background color might be printed by the OS-specific
 		   scrolling function.  (This behavior is overridden by the
 		   Hugo Engine for in-window printing, which always adds new
-		   lines in the current background color when scrolling.)
+		   hugolines in the current background color when scrolling.)
 		*/
 		hugo_setbackcolor((inwindow)?bgcolor:default_bgcolor);
 		hugo_print("\r");
@@ -1770,23 +1770,23 @@ void Printout(char *a)
 		hugo_font(currentfont = last_printed_font);
 
 #ifndef GLK
-		if (currentline > physical_windowheight/lineheight)
+		if (currenthugoline > physical_windowheight/hugolineheight)
 		{
-			int full_limit = physical_windowheight/lineheight;
+			int full_limit = physical_windowheight/hugolineheight;
 
 			hugo_scrollwindowup();
 
 			if ((current_text_y)
 				&& full >= full_limit-3
-				&& physical_windowbottom-current_text_y-lineheight > lineheight/2)
+				&& physical_windowbottom-current_text_y-hugolineheight > hugolineheight/2)
 			{
 				PromptMore();
 			}
-			currentline = full_limit;
+			currenthugoline = full_limit;
 		}
 
-		/* Don't scroll single-line windows before PromptMore() */
-		else if (physical_windowheight/lineheight > 1)
+		/* Don't scroll single-hugoline windows before PromptMore() */
+		else if (physical_windowheight/hugolineheight > 1)
 #endif
 		{
 			hugo_print("\n");
@@ -1805,27 +1805,27 @@ void Printout(char *a)
 #endif
 	just_left_window = false;
 
-	/* If no newline is to be printed after the current line: */
+	/* If no newhugoline is to be printed after the current hugoline: */
 	if (sticky)
 	{
 		currentpos += l;
 	}
 
-	/* Otherwise, take care of all the line-feeding, line-counting,
+	/* Otherwise, take care of all the hugoline-feeding, hugoline-counting,
 	   etc.
 	*/
 	else
 	{
 		currentpos = 0;
-		if (currentline++ > physical_windowheight/lineheight)
-			currentline = physical_windowheight/lineheight;
+		if (currenthugoline++ > physical_windowheight/hugolineheight)
+			currenthugoline = physical_windowheight/hugolineheight;
 
 		if (!playback) skipping_more = false;
 
 		++full;
 		
-		/* The after-check of the linecount: */
-		if ((full) && full >= physical_windowheight/lineheight)
+		/* The after-check of the hugolinecount: */
+		if ((full) && full >= physical_windowheight/hugolineheight)
 		{
 			PromptMore();
 		}
@@ -1872,14 +1872,14 @@ void PromptMore(void)
 	tempcurrentfont = currentfont;
 	hugo_font(currentfont = NORMAL_FONT);
 
-	hugo_settextpos(1, physical_windowheight/lineheight);
+	hugo_settextpos(1, physical_windowheight/hugolineheight);
 
 #ifdef NO_TERMINAL_LINEFEED
 	/* For ports where it's possible, do a better "MORE..." prompt
 	   without a flashing caret */
 	if (default_bgcolor!=DEF_SLBGCOLOR)
 	{
-		/* system statusline colors */
+		/* system statushugoline colors */
 		hugo_settextcolor(DEF_SLFCOLOR);
 		hugo_setbackcolor(DEF_SLBGCOLOR);
 	}
@@ -1894,7 +1894,7 @@ void PromptMore(void)
 	}
 
 	if (current_text_y)
-		current_text_y = physical_windowbottom - lineheight;
+		current_text_y = physical_windowbottom - hugolineheight;
 
 	/* Make sure we fit in a window */
 	if (physical_windowwidth/FIXEDCHARWIDTH >= 19)
@@ -1940,9 +1940,9 @@ void PromptMore(void)
 	else if (playback && k=='+')
 		skipping_more = true;
 
-	hugo_settextpos(1, physical_windowheight/lineheight);
+	hugo_settextpos(1, physical_windowheight/hugolineheight);
 #ifdef NO_TERMINAL_LINEFEED
-	current_text_y = physical_windowbottom - lineheight;
+	current_text_y = physical_windowbottom - hugolineheight;
 	/* Make sure we fit in a window */
 	if (physical_windowwidth/FIXEDCHARWIDTH >= 19)
 		hugo_print("                    ");
@@ -1953,7 +1953,7 @@ void PromptMore(void)
 #endif
 	hugo_font(currentfont = tempcurrentfont);
 
-	hugo_settextpos(1, physical_windowheight/lineheight);
+	hugo_settextpos(1, physical_windowheight/hugolineheight);
 	current_text_y = temp_current_text_y;
 	full = 0;
 
@@ -1982,13 +1982,13 @@ int RecordCommands(void)
 #if !defined (GLK)
 				/* stdio implementation */
 				hugo_getfilename("for command recording", recordfile);
-				if (!strcmp(line, ""))
+				if (!strcmp(hugoline, ""))
 					return 0;
-				if (!hugo_overwrite(line))
+				if (!hugo_overwrite(hugoline))
 					return 0;
-				if (!(record = HUGO_FOPEN(line, "wt")))
+				if (!(record = HUGO_FOPEN(hugoline, "wt")))
 					return 0;
-				strcpy(recordfile, line);
+				strcpy(recordfile, hugoline);
 #else
 				/* Glk implementation */
 				frefid_t fref = NULL;
@@ -2026,11 +2026,11 @@ int RecordCommands(void)
 #if !defined (GLK)
 				/* stdio implementation */
 				hugo_getfilename("for command playback", recordfile);
-				if (!strcmp(line, ""))
+				if (!strcmp(hugoline, ""))
 					return 0;
-				if (!(playback = HUGO_FOPEN(line, "rt")))
+				if (!(playback = HUGO_FOPEN(hugoline, "rt")))
 					return 0;
-				strcpy(recordfile, line);
+				strcpy(recordfile, hugoline);
 #else
 				/* Glk implementation */
 				frefid_t fref = NULL;

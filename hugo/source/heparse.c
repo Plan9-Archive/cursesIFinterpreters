@@ -58,7 +58,7 @@ int GetVal(void);			/* from heexpr.c */
 
 char buffer[MAXBUFFER+MAXWORDS];        /* input buffer                    */
 char errbuf[MAXBUFFER+1];               /* last invalid input              */
-char line[1025];                        /* line buffer                     */
+char hugoline[1025];                        /* hugoline buffer                     */
 
 int words = 0;                          /* parsed word count               */
 char *word[MAXWORDS+1];                 /* breakdown into words            */
@@ -69,7 +69,7 @@ signed char remaining = 0;              /* multiple commands in input      */
 char parseerr[MAXBUFFER+1];             /* for passing to RunPrint, etc.   */
 char parsestr[MAXBUFFER+1];             /* for passing quoted string       */
 char xverb;                             /* flag; 0 = regular verb          */
-char starts_with_verb;			/* input line; 0 = no verb word    */
+char starts_with_verb;			/* input hugoline; 0 = no verb word    */
 unsigned int grammaraddr;             	/* address in grammar              */
 char *obj_parselist = NULL;             /* objects with noun/adjective     */
 int domain, odomain;                  	/* of object(s)                    */
@@ -530,7 +530,7 @@ void KillWord(int a)
 
 		1.  Match the verb.
 
-		2.  If no match, check to see if the line begins with an
+		2.  If no match, check to see if the hugoline begins with an
 		    object (character) and try to match it.
 
 		3.  If found, try to match a syntax for that verb, including
@@ -618,7 +618,7 @@ int MatchCommand()
 
 		/* Rebuild the corrected buffer */
 		oopscount = 1;
-		strcpy(line, word[2]);
+		strcpy(hugoline, word[2]);
 		for (i=1; i<=(int)strlen(errbuf); i++)
 		{
 			if (!strcmp(Mid(errbuf, i, strlen(oops)), oops))
@@ -627,7 +627,7 @@ int MatchCommand()
 
 		strcpy(buffer, errbuf);
 		buffer[i-1] = '\0';
-		strcat(buffer, line);
+		strcat(buffer, hugoline);
 
 		strcat(buffer, Right(errbuf, strlen(errbuf) - i - strlen(oops) + 1));
 
@@ -697,7 +697,7 @@ MatchVerb:
 				if (PeekWord(verbptr)!=0xffff)
 				{
 					/* If one of the verb words matches the first
-					   word in the input line
+					   word in the input hugoline
 					*/
 					if (wd[1]==PeekWord(verbptr))
 					{
@@ -815,7 +815,7 @@ MatchVerb:
 		speaking = pobj;                        /* successful */
 		gotspeaker = true;
 
-		/* So erase the object name from the start of the line */
+		/* So erase the object name from the start of the hugoline */
 		for (i=1; i<=objfinish; i++)
 			KillWord(1);
 		if (word[1][0]=='~') KillWord(1);
@@ -1090,7 +1090,7 @@ int MatchObject(int *wordnum)
 			}
 
 
-			/* If checking the start of an input line, i.e. for
+			/* If checking the start of an input hugoline, i.e. for
 			   a command addressed to an object (character):
 			*/
 			if (obj_match_state==5 && !flag) goto Clarify;
@@ -1511,8 +1511,8 @@ Clarify:
 					if (strcmp(Name(i), ""))
 					{
 						pobj = i;
-						sprintf(line, "(%s)", Name(i));
-						AP(line);
+						sprintf(hugoline, "(%s)", Name(i));
+						AP(hugoline);
 						goto RestoreTempArrays;
 					}
 				}
@@ -2411,8 +2411,8 @@ void ParseError(int e, int a)
 			break;
 
 		case 1:
-			sprintf(line, "You can't use the word \"%s\".", parseerr);
-			AP(line);
+			sprintf(hugoline, "You can't use the word \"%s\".", parseerr);
+			AP(hugoline);
 			break;
 
 		case 2:
@@ -2420,8 +2420,8 @@ void ParseError(int e, int a)
 			break;
 
 		case 3:
-			sprintf(line, "You can't %s multiple objects.", parseerr);
-			AP(line);
+			sprintf(hugoline, "You can't %s multiple objects.", parseerr);
+			AP(hugoline);
 			break;
 
 		case 4:
@@ -2429,8 +2429,8 @@ void ParseError(int e, int a)
 			break;
 
 		case 5:
-			sprintf(line, "You haven't seen any \"%s\", nor are you likely to in the near future even if such a thing exists.", parseerr);
-			AP(line);
+			sprintf(hugoline, "You haven't seen any \"%s\", nor are you likely to in the near future even if such a thing exists.", parseerr);
+			AP(hugoline);
 			break;
 
 		case 6:
@@ -2443,7 +2443,7 @@ void ParseError(int e, int a)
 
 		case 8:
 		{
-			sprintf(line, "Which %s do you mean, ", !parse_called_twice?parseerr:"exactly");
+			sprintf(hugoline, "Which %s do you mean, ", !parse_called_twice?parseerr:"exactly");
 			count = 1;
 			for (k=0; k<pobjcount; k++)
 			{
@@ -2453,13 +2453,13 @@ void ParseError(int e, int a)
 				{
 					if (count==pobjcount)
 					{
-						if (count > 2) strcat(line, ",");
-						strcat(line, " or ");
+						if (count > 2) strcat(hugoline, ",");
+						strcat(hugoline, " or ");
 					}
 					else
 					{
 						if (count != 1)
-							strcat(line, ", ");
+							strcat(hugoline, ", ");
 					}
 					if (GetProp(i, article, 1, 0))
 					{
@@ -2467,25 +2467,25 @@ void ParseError(int e, int a)
 						/* Don't use "a" or "an" in listing */
 						/*
 						if (!strcmp(w, "a") || !strcmp(w, "an"))
-							strcat(line, "the ");
+							strcat(hugoline, "the ");
 						else
-							sprintf(line+strlen(line), "%s ", w);
+							sprintf(hugoline+strlen(hugoline), "%s ", w);
 						*/
 						/* We'll just use "the" */
-						if (w) strcat(line, "the ");
+						if (w) strcat(hugoline, "the ");
 					}
-					strcat(line, Name(i));
+					strcat(hugoline, Name(i));
 					count++;
 				}
 			}
-			strcat(line, "?");
-			AP(line);
+			strcat(hugoline, "?");
+			AP(hugoline);
 			break;
 		}
 
 		case 9:
-			sprintf(line, "Nothing to %s.", parseerr);
-			AP(line);
+			sprintf(hugoline, "Nothing to %s.", parseerr);
+			AP(hugoline);
 			break;
 
 		case 10:
@@ -2497,8 +2497,8 @@ void ParseError(int e, int a)
 			break;
 
 		case 12:
-			sprintf(line, "You can't do that with the %s.", Name(a));
-			AP(line);
+			sprintf(hugoline, "You can't do that with the %s.", Name(a));
+			AP(hugoline);
 			break;
 
 		case 13:
@@ -2585,7 +2585,7 @@ void SeparateWords(void)
 	int i;
 
 
-	/* First filter the line of any user-specified punctuation */
+	/* First filter the hugoline of any user-specified punctuation */
 	do
 	{
 		i = strcspn(buffer, punc_string);

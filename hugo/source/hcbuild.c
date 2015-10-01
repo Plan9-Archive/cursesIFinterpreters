@@ -45,7 +45,7 @@ char incompprop = 0;            /* true when in before/after/etc.  */
 	This is the main coding loop, called when a block of code is
 	to be compiled.  Here are made any decisions as to special
 	handling of loops and other constructions; the default is
-	simply to code the line as is by calling CodeLine().  The
+	simply to code the hugoline as is by calling CodeLine().  The
 	'from' argument is for when BuildCode() is called for a
 	particular reason, such as from CodeLine().
 */
@@ -61,7 +61,7 @@ void BuildCode(unsigned char from)
 	int block_finished = 0;
 
 	long returnpos, skipaddr;	/* to relocate after coding an in- */
-					/*   line property routine assign. */
+					/*   hugoline property routine assign. */
 
 	enternest = nest;
 	do
@@ -158,8 +158,8 @@ void BuildCode(unsigned char from)
 		{
 			if (sinceif > 1)
 			{
-				sprintf(line, "'%s' statement does not follow 'if'/'elseif'", word[1]);
-				Error(line);
+				sprintf(hugoline, "'%s' statement does not follow 'if'/'elseif'", word[1]);
+				Error(hugoline);
 			}
 			sinceif = 0;
 			CodeIf();
@@ -198,8 +198,8 @@ void BuildCode(unsigned char from)
 		{
 			if (from==WINDOW_T || from==WRITEFILE_T)
 			{
-				sprintf(line, "'jump' or label illegal in '%s' block", token[from]);
-				Error(line);
+				sprintf(hugoline, "'jump' or label illegal in '%s' block", token[from]);
+				Error(hugoline);
 			}
 
 			if (word[1][0]=='~') goto ChecktheLine;
@@ -208,7 +208,7 @@ void BuildCode(unsigned char from)
 
 		else
                 {
-			/* First of all, check to see if we're coding a line
+			/* First of all, check to see if we're coding a hugoline
 			   that will never be reached.  A previous 'return',
 			   'jump', or 'break' at this nesting level is the signal,
 			   which is erased if a label is encountered.
@@ -221,7 +221,7 @@ ChecktheLine:
 			  	block_finished = nest;
 			}
 
-			/* Here, the default is simply to code the line.
+			/* Here, the default is simply to code the hugoline.
 			   The checkcompprop flag is set to true because
 			   none of the above constructions is legal in a
 			   complex property outside the code block itself.
@@ -252,8 +252,8 @@ CodetheLine:
 			if (unused[i])
 			{
 				words = 0;
-				sprintf(line, "?Unused local variable \"%s\"",  local[i]);
-				Error(line);
+				sprintf(hugoline, "?Unused local variable \"%s\"",  local[i]);
+				Error(hugoline);
 			}
 		}
 	}
@@ -334,8 +334,8 @@ void BuildEvent(void)
 
 void PropertyAlreadyDefined(int i)
 {
-	sprintf(line, "?Property \"%s\" already defined", property[i]);
-	Error(line);
+	sprintf(hugoline, "?Property \"%s\" already defined", property[i]);
+	Error(hugoline);
 }
 
 void BuildObject(int from)
@@ -346,7 +346,7 @@ void BuildObject(int from)
 	int objstack[16],
 		objstackcount = 0;	/* for multiple-object inheritance */
 
-	int inobj = 0, linesdone = 0,
+	int inobj = 0, hugolinesdone = 0,
 		isnot = 0,		/* isnot is true if attributes are */
 					/*   being enumerated as beginning */
 					/*   with "is not..."		   */
@@ -392,7 +392,7 @@ void BuildObject(int from)
 	if ((words) && word[1][0]=='\"')
 	{
 		StripQuotes(word[1]);
-		strcpy(line, word[1]);
+		strcpy(hugoline, word[1]);
 		KillWord(1);
 
 		/* property 0 (name) */
@@ -402,14 +402,14 @@ void BuildObject(int from)
 		SavePropData(1);
 
 		/* Write the dictionary position */
-		SavePropData(AddDictionary(line));
+		SavePropData(AddDictionary(hugoline));
 
 		if (!(propadd[0] & ADDITIVE_FLAG)) propset[0] = 1;
 		proptable = proptable + 4;
 	}
 
 	/* Since it's possible to put an "in" or "nearby" directive on
-	   the same line as the declaration, only get a new line if there
+	   the same hugoline as the declaration, only get a new hugoline if there
 	   are no more words remaining on this one.
 	*/
 	if (!words)
@@ -423,9 +423,9 @@ void BuildObject(int from)
 
 	do
 	{
-		/* linesdone is gives the number of lines already
+		/* hugolinesdone is gives the number of hugolines already
 		   processed */
-		if (linesdone++)
+		if (hugolinesdone++)
 		{
 			GetWords();
 		}
@@ -446,8 +446,8 @@ void BuildObject(int from)
 		{
 			if (parent[objectctr])
 			{
-				sprintf(line, "\"%s\" already placed in object tree", object[objectctr]);
-				Error(line);
+				sprintf(hugoline, "\"%s\" already placed in object tree", object[objectctr]);
+				Error(hugoline);
 			}
 
 			if (!strcmp(word[1], "nearby") && !strcmp(word[2], "") && objectctr)
@@ -469,17 +469,17 @@ void BuildObject(int from)
 					Error("No such object");
 			}
 
-			if (words>2) Expect(3, "NULL", "end-of-line after object");
+			if (words>2) Expect(3, "NULL", "end-of-hugoline after object");
 
-			/* Just in case "in" or "nearby" comes on the first line of
+			/* Just in case "in" or "nearby" comes on the first hugoline of
 			   the object declaration
 			*/
-			if (linesdone==1 && !inobj)
+			if (hugolinesdone==1 && !inobj)
 			{
 				GetWords();
 				DoBrace();
 				inobj = true;
-				linesdone = 0;
+				hugolinesdone = 0;
 				continue;
 			}
 
@@ -575,8 +575,8 @@ void BuildObject(int from)
 				/* If not a valid attribute or alias */
 				if (flag == 0)
 				{
-					sprintf(line, "Undefined attribute \"%s\"", word[i]);
-					Error(line);
+					sprintf(hugoline, "Undefined attribute \"%s\"", word[i]);
+					Error(hugoline);
 				}
 			}
 
@@ -641,8 +641,8 @@ void BuildObject(int from)
 		/* Neither a property or an alias */
 		if (flag == 0)
 		{
-			sprintf(line, "Undefined property \"%s\"", word[1]);
-			Error(line);
+			sprintf(hugoline, "Undefined property \"%s\"", word[1]);
+			Error(hugoline);
 		}
 
 NextCase:;
@@ -662,11 +662,11 @@ LeaveBuildObject:
 	/* Finally, if no textual name was given, create one: */
 	if (!propset[0])
 	{
-		sprintf(line, "(%s)", object[objectctr]);
+		sprintf(hugoline, "(%s)", object[objectctr]);
 
 		SavePropData(0);
 		SavePropData(1);
-		SavePropData(AddDictionary(line));
+		SavePropData(AddDictionary(hugoline));
 
 		if (!(propadd[0] & ADDITIVE_FLAG)) propset[0] = 1;
 		proptable = proptable + 4;
@@ -721,8 +721,8 @@ void BuildProperty(int obj, int p)
 			*/
 			if (t >= PROP_LINK_ROUTINE)
 			{
-				sprintf(line, "Properties limited to %d elements", PROP_LINK_ROUTINE-1);
-				Error(line);
+				sprintf(hugoline, "Properties limited to %d elements", PROP_LINK_ROUTINE-1);
+				Error(hugoline);
 				return;
 			}
 
@@ -750,8 +750,8 @@ void BuildProperty(int obj, int p)
 		*/
 		if (words-1-neg >= PROP_LINK_ROUTINE)
 		{
-			sprintf(line, "Properties limited to %d elements", PROP_LINK_ROUTINE-1);
-			Error(line);
+			sprintf(hugoline, "Properties limited to %d elements", PROP_LINK_ROUTINE-1);
+			Error(hugoline);
 			return;
 		}
 		neg_count = neg;
@@ -794,10 +794,10 @@ void BuildProperty(int obj, int p)
 				{
 					if (word[i][j]>='A' && word[i][j]<='Z')
 					{
-						sprintf(line,
+						sprintf(hugoline,
 							"?Uppercase character(s) in %s",
 							property[p]);
-						Error(line);
+						Error(hugoline);
 						break;
 					}
 				}
@@ -921,8 +921,8 @@ void BuildRoutine(void)
 
 /* BUILDVERB
 
-	To be honest, BuildVerb() really only codes the first line of a
-	verb definition.  All the following lines are handled by CodeLine(),
+	To be honest, BuildVerb() really only codes the first hugoline of a
+	verb definition.  All the following hugolines are handled by CodeLine(),
 	as called by BuildCode().
 */
 
@@ -1005,8 +1005,8 @@ void Inherit(int obj)
 
 	if (obj >= objectctr)
 	{
-		sprintf(line, "?Cannot inherit from unbuilt \"%s\"", object[obj]);
-		Error(line);
+		sprintf(hugoline, "?Cannot inherit from unbuilt \"%s\"", object[obj]);
+		Error(hugoline);
 		return;
 	}
 

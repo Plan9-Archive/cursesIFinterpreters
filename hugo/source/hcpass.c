@@ -52,7 +52,7 @@ unsigned int textcount = 0;	/* for linking text bank */
 	so that they are recognizable to the compiler during Pass2().
 	Here, everything contained in an object, routine, or event is
 	written into the temporary allfile, which is a contiguous master
-	file of parsed lines (i.e. broken down into tokens).
+	file of parsed hugolines (i.e. broken down into tokens).
 */
 
 void Pass1(void)
@@ -78,7 +78,7 @@ void Pass1(void)
 		GetLine(0);
 
 		if (percent)
-			printf("\rCompiling %5d lines of %s", totallines, sourceupper);
+			printf("\rCompiling %5d hugolines of %s", totalhugolines, sourceupper);
 
 		if (words > 0)
 		{
@@ -108,8 +108,8 @@ DefineanObject:
 
 				if (objectctr==MAXOBJECTS)
 					{objectctr = MAXOBJECTS-1;
-					sprintf(line, "Maximum of %d objects exceeded", MAXOBJECTS);
-					Error(line);}
+					sprintf(hugoline, "Maximum of %d objects exceeded", MAXOBJECTS);
+					Error(hugoline);}
 
 				DefOther();
 			}
@@ -126,8 +126,8 @@ DefineanObject:
 
 				if (routinectr==MAXROUTINES)
 					{routinectr = MAXROUTINES-1;
-					sprintf(line, "Maximum of %d routines exceeded", MAXROUTINES);
-					Error(line);}
+					sprintf(hugoline, "Maximum of %d routines exceeded", MAXROUTINES);
+					Error(hugoline);}
 
 				DefOther();
 			}
@@ -146,13 +146,13 @@ DefineanObject:
 				{
 					if (token_val<objinitial)
 					{
-						sprintf(line, "?Precompiled references to old \"%s\" may be invalid", object[token_val]);
-						Error(line);
+						sprintf(hugoline, "?Precompiled references to old \"%s\" may be invalid", object[token_val]);
+						Error(hugoline);
 					}
 
-					sprintf(line, "<replaced \"%s\">", object[token_val]);
+					sprintf(hugoline, "<replaced \"%s\">", object[token_val]);
 					free(object[token_val]);
-					object[token_val] = MakeString(line);
+					object[token_val] = MakeString(hugoline);
 					object_hash[token_val] = 0;
 					oreplace[token_val]++;
 					word[1] = "object";
@@ -162,8 +162,8 @@ DefineanObject:
 				}
 				else
 				{
-					sprintf(line, "Not an object or routine:  %s", word[2]);
-					Error(line);
+					sprintf(hugoline, "Not an object or routine:  %s", word[2]);
+					Error(hugoline);
 				}
 			}
 
@@ -177,8 +177,8 @@ DefineanObject:
 
 				if (eventctr==MAXEVENTS)
 					{eventctr = MAXEVENTS-1;
-					sprintf(line, "Maximum of %d events exceeded", MAXEVENTS);
-					Error(line);}
+					sprintf(hugoline, "Maximum of %d events exceeded", MAXEVENTS);
+					Error(hugoline);}
 
 				DefOther();
 			}
@@ -234,8 +234,8 @@ DefineanObject:
 
 						if (objectctr==MAXOBJECTS)
 							{objectctr = MAXOBJECTS-1;
-							sprintf(line, "Maximum of %d objects exceeded", MAXOBJECTS);
-							Error(line);}
+							sprintf(hugoline, "Maximum of %d objects exceeded", MAXOBJECTS);
+							Error(hugoline);}
 
 						DefOther();
 						flag = 1;
@@ -244,8 +244,8 @@ DefineanObject:
 				}
 
 				if (!flag)
-					{sprintf(line, "Unknown compiler directive:  %s", word[1]);
-					Error(line);}
+					{sprintf(hugoline, "Unknown compiler directive:  %s", word[1]);
+					Error(hugoline);}
 			}
 		}
 	}
@@ -274,12 +274,12 @@ void Pass2(void)
 	{
 		printf("\n");
 		if (listing)
-			if (fprintf(listfile, "Compiling %5d lines of %s\n", totallines, PRINTED_FILENAME(sourcefilename)) < 0)
+			if (fprintf(listfile, "Compiling %5d hugolines of %s\n", totalhugolines, PRINTED_FILENAME(sourcefilename)) < 0)
 				FatalError(WRITE_E, listfilename);
 
 #if defined (STDPRN_SUPPORTED)
 		if (printer)
-			if (fprintf(stdprn, "Compiling %5d lines of %s\n\r", totallines, PRINTED_FILENAME(sourcefilename)) < 0)
+			if (fprintf(stdprn, "Compiling %5d hugolines of %s\n\r", totalhugolines, PRINTED_FILENAME(sourcefilename)) < 0)
 				FatalError(WRITE_E, "printer");
 #endif
 	}
@@ -393,8 +393,8 @@ PostBuildObject:
 				}
 				else
 				{
-					sprintf(line, "Syntax error:  %s", word[2]);
-					Error(line);
+					sprintf(hugoline, "Syntax error:  %s", word[2]);
+					Error(hugoline);
 				}
 			}
 
@@ -428,8 +428,8 @@ PostBuildObject:
 							if (!oreplace[objectctr])
 							{
 								sprintf(object_id, "object %s", object[objectctr]);
-								sprintf(line, "?Cannot inherit from unbuilt \"%s\"", object[i]);
-								Error(line);
+								sprintf(hugoline, "?Cannot inherit from unbuilt \"%s\"", object[i]);
+								Error(hugoline);
 							}
 							i = 0;
 						}
@@ -448,8 +448,8 @@ PostBuildObject:
 				{
 					if (word[1][0]=='\0') break;
 
-					sprintf(line, "Unknown build directive:  %s", word[1]);
-					Error(line);
+					sprintf(hugoline, "Unknown build directive:  %s", word[1]);
+					Error(hugoline);
 				}
 			}
 		}
@@ -502,8 +502,8 @@ void Pass3(void)
 	if (mainaddr==0 && !hlb) Error("No \"main\" routine");
 
 	if (codeptr >= 65536L*address_scale)
-		{sprintf(line, "Grammar and executable code exceed %dK", 64*address_scale);
-		Error(line);}
+		{sprintf(hugoline, "Grammar and executable code exceed %dK", 64*address_scale);
+		Error(hugoline);}
 
 
 	/*
@@ -524,15 +524,15 @@ void Pass3(void)
 #if defined (DEBUG_FULLOBJ)
 		if (fullobj)
 		{
-			sprintf(line, "\nOBJECT %d:  %s", i, object[i]);
-			Printout(line);
+			sprintf(hugoline, "\nOBJECT %d:  %s", i, object[i]);
+			Printout(hugoline);
 
-			sprintf(line, "Parent:  %s    Sibling:  %s    Child:  %s",
+			sprintf(hugoline, "Parent:  %s    Sibling:  %s    Child:  %s",
 					object[parent[i]], object[sibling[i]], object[child[i]]);
-                        Printout(line);
+                        Printout(hugoline);
 
-			sprintf(line, "Property table address:  %s", PrintHex((unsigned)objpropaddr[i], 2));
-			Printout(line);
+			sprintf(hugoline, "Property table address:  %s", PrintHex((unsigned)objpropaddr[i], 2));
+			Printout(hugoline);
 
 			/* Property number */
 			p = propdata[a/PROPBLOCKSIZE][a%PROPBLOCKSIZE];
@@ -566,8 +566,8 @@ void Pass3(void)
 
 					d = propdata[a/PROPBLOCKSIZE][a%PROPBLOCKSIZE];
 					a++;
-					sprintf(line, "Routine address:  %6s", PrintHex((long)(d+j)*address_scale, 3));
-					strcat(buffer, line);
+					sprintf(hugoline, "Routine address:  %6s", PrintHex((long)(d+j)*address_scale, 3));
+					strcat(buffer, hugoline);
 				}
 				else
 				{
@@ -575,9 +575,9 @@ void Pass3(void)
 					/* Get property data */
 					for (k=1; k<=d; k++)
 					{
-						sprintf(line, "%s ", PrintHex(propdata[a/PROPBLOCKSIZE][a%PROPBLOCKSIZE], 2));
+						sprintf(hugoline, "%s ", PrintHex(propdata[a/PROPBLOCKSIZE][a%PROPBLOCKSIZE], 2));
 						a++;
-						strcat(buffer, line);
+						strcat(buffer, hugoline);
 					}
 				}
 				Printout(buffer);
@@ -590,8 +590,8 @@ void Pass3(void)
 			{
 				if (objattr[j/32][i] & 1L<<(j%32))
 				{
-					sprintf(line, "\tAttribute:  %s", attribute[j]);
-					Printout(line);
+					sprintf(hugoline, "\tAttribute:  %s", attribute[j]);
+					Printout(hugoline);
 				}
 			}
 		}
@@ -955,53 +955,53 @@ void Pass3(void)
 
 	if (memmap)
 	{
-		sprintf(line, "\nMEMORY USAGE FOR:  %s", PRINTED_FILENAME(objectfilename));
-		Printout(line);
-		sprintf(line, "\n          (Top:  $%6s)", PrintHex(codeptr, 3));
-		Printout(line);
+		sprintf(hugoline, "\nMEMORY USAGE FOR:  %s", PRINTED_FILENAME(objectfilename));
+		Printout(hugoline);
+		sprintf(hugoline, "\n          (Top:  $%6s)", PrintHex(codeptr, 3));
+		Printout(hugoline);
                 PrintFrameLine();
 
 		if (hlb)
 			Printout("| Link tables and |               |");
 
-		sprintf(line, "| Text bank       | $%6s bytes |", PrintHex(codeptr-textbankaddr*16L, 3));
-		Printout(line);
+		sprintf(hugoline, "| Text bank       | $%6s bytes |", PrintHex(codeptr-textbankaddr*16L, 3));
+		Printout(hugoline);
                 PrintFrameLine();
-	   	sprintf(line, "| Dictionary      |   $%4s bytes |",
+	   	sprintf(hugoline, "| Dictionary      |   $%4s bytes |",
 			PrintHex(textbankaddr*16L-dictaddr*16L, 2));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
-	   	sprintf(line, "| Special words   |   $%4s bytes |",
+	   	sprintf(hugoline, "| Special words   |   $%4s bytes |",
 			PrintHex(dictaddr*16L-synaddr*16L, 2));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
-	   	sprintf(line, "| Array space     |   $%4s bytes |",
+	   	sprintf(hugoline, "| Array space     |   $%4s bytes |",
 			PrintHex(synaddr*16L-arraytableaddr*16L, 2));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
-	   	sprintf(line, "| Event table     |   $%4s bytes |",
+	   	sprintf(hugoline, "| Event table     |   $%4s bytes |",
 			PrintHex(arraytableaddr*16L-eventtableaddr*16L, 2));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
-	   	sprintf(line, "| Property table  |   $%4s bytes |",
+	   	sprintf(hugoline, "| Property table  |   $%4s bytes |",
 			PrintHex(eventtableaddr*16L-proptableaddr*16L, 2));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
-	   	sprintf(line, "| Object table    |   $%4s bytes |",
+	   	sprintf(hugoline, "| Object table    |   $%4s bytes |",
 			PrintHex(proptableaddr*16L-objtableaddr*16L, 2));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
-	   	sprintf(line, "| Executable code | $%6s bytes |",
+	   	sprintf(hugoline, "| Executable code | $%6s bytes |",
 			PrintHex(objtableaddr*16L-codestart, 3));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
-	   	sprintf(line, "| Grammar table   |   $%4s bytes |",
+	   	sprintf(hugoline, "| Grammar table   |   $%4s bytes |",
 			PrintHex(codestart-HEADER_LENGTH, 2));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
-		sprintf(line, "| Header          |   $%4s bytes |",
+		sprintf(hugoline, "| Header          |   $%4s bytes |",
 			PrintHex(HEADER_LENGTH, 2));
-		Printout(line);
+		Printout(hugoline);
                 PrintFrameLine();
 		Printout("        (Bottom:  $000000)");
 	}
