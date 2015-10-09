@@ -16,7 +16,6 @@
 #define HCINTERIM ".03 (2.5)"
 #endif
 
-#define	toascii(c)	((c)&0177)
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -55,8 +54,6 @@ extern char *token[];
 
    (although this is typically done in the makefile)
 */
-
-#define GCC_UNIX
 
 /*---------------------------------------------------------------------------
 	Definitions for the Acorn Archimedes & RPC
@@ -357,7 +354,7 @@ extern FILE *hugo_fopen (char *filename, char *mode);
 #define MAXADDRBLOCKS 65536*2/ADDRBLOCKSIZE
 #define MAXPROPBLOCKS 65536*2/PROPBLOCKSIZE
 
-/* Maximums for reading hugolines from a sourcefile */
+/* Maximums for reading lines from a sourcefile */
 #define MAXWORDS         255
 #define MAXBUFFER       1024
 
@@ -614,16 +611,16 @@ void StripQuotes(char *a);
 extern int argc;
 extern char **argv, **envp;
 extern char errfile[];
-extern unsigned int errhugoline;
+extern unsigned int errline;
 extern int words;
 extern char *word[];
-extern char hugoline[];
+extern char line[];
 extern char full_buffer;
 extern char listing, objecttree, fullobj, printer, statistics, printdebug,
 	override, aborterror, memmap, hlb, builddebug, expandederr,
 	spellcheck, writeanyway;
 extern char compile_v25;
-extern int percent, totalhugolines, thugolines;
+extern int percent, totallines, tlines;
 extern int er;
 extern int warn;
 extern char **sets;

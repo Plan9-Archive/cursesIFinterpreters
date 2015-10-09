@@ -142,8 +142,8 @@ void CreateResourceFile(void)
 		{
 			if (rescount==MAX_RESOURCES_PER_FILE)
 			{
-				sprintf(hugoline, "Maximum of %d resources per resource file exceeded", MAX_RESOURCES_PER_FILE);
-				Error(hugoline);
+				sprintf(line, "Maximum of %d resources per resource file exceeded", MAX_RESOURCES_PER_FILE);
+				Error(line);
 				break;
 			}
 	
@@ -166,8 +166,8 @@ void CreateResourceFile(void)
 	
 			if (resource==NULL)
 			{
-				sprintf(hugoline, "Unable to find resource \"%s\"", word[j]);
-				Error(hugoline);
+				sprintf(line, "Unable to find resource \"%s\"", word[j]);
+				Error(line);
 	
 				/* At any point if there's an error initially finding
 				   or reading the resource, remove it from the list
@@ -201,8 +201,8 @@ SkipthisResource:
 			{
 				if (!strcmp(resourcename[i], filename))
 				{
-					sprintf(hugoline, "Duplicate resource name \"%s\" in \"%s\"", filename, resfilename);
-					Error(hugoline);
+					sprintf(line, "Duplicate resource name \"%s\" in \"%s\"", filename, resfilename);
+					Error(line);
 				}
 			}
 	

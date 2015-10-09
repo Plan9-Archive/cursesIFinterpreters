@@ -90,7 +90,7 @@ char *token[] =
 	"not", "true", "false", "local", "verb", "xverb", "held", "multi",
 	
 	/* 0x30 - 0x3f */
-	"multiheld", "newhugoline", "anything", "print",
+	"multiheld", "newline", "anything", "print",
 	"number", "capital", "text", "graphics",
 	"color", "remove", "move", "to",
 	"parent", "sibling", "child", "youngest",

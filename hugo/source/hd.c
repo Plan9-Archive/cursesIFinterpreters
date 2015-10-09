@@ -18,8 +18,6 @@
 
 #include "heheader.h"
 #include "hdheader.h"
-#include "hdinter.h"
-
 
 
 /* Function prototypes: */
@@ -58,7 +56,7 @@ char **choice;                              /* array for SelectBox */
 char debugger_run = 0;                  /* true when running freely     */
 char debugger_interrupt = 0;		/* true if stepping 		*/
 char debugger_collapsing;		/* true if collapsing calls	*/
-char during_input;			/* true in hugo_gethugoline() 	*/
+char during_input;			/* true in hugo_getline() 	*/
 char trace_complex_prop_routine = 0;	/* true if running obj.prop	*/
 char debugger_step_over = 0;		/* true if stepping over	*/
 char debugger_skip = 0;			/* true if skipping next	*/
@@ -67,7 +65,7 @@ char debugger_step_back = 0;		/* true if stepping back	*/
 char debugger_has_stepped_back = 0;	/* true once stepped back	*/
 int step_nest;				/* stepping over nested calls	*/
 
-char debug_hugoline[MAXBUFFER];
+char debug_line[MAXBUFFER];
 
 /* For engine routines: */
 /* hemisc.c */
@@ -150,14 +148,14 @@ MainEventLoop:
 	{
 		/* print the bottom caption */
 #if !defined (USE_OTHER_MENUS)
-		sprintf(debug_hugoline, " Press %s for menu", MENUBAR_KEY);
+		sprintf(debug_line, " Press %s for menu", MENUBAR_KEY);
 #else
-/*		sprintf(debug_hugoline, " Hugo Debugger v%d.%d%s", HEVERSION, HEREVISION, HEINTERIM); */
-		sprintf(debug_hugoline, " %s", gamefile);
+/*		sprintf(debug_line, " Hugo Debugger v%d.%d%s", HEVERSION, HEREVISION, HEINTERIM); */
+		sprintf(debug_line, " %s", gamefile);
 		if (RoutineName(currentroutine)[0]!='<')
-			sprintf(debug_hugoline+strlen(debug_hugoline), ": %s", RoutineName(currentroutine));
+			sprintf(debug_line+strlen(debug_line), ": %s", RoutineName(currentroutine));
 #endif
-		debug_windowbottomrow(debug_hugoline);
+		debug_windowbottomrow(debug_line);
 
 		debug_settextpos(D_SCREENWIDTH, D_SCREENHEIGHT);
 
@@ -171,7 +169,7 @@ MainEventLoop:
 			case DOUBLECLICK:
 				/* The SINGLECLICK and DOUBLECLICK action 
 				   currently assume that the newly clicked 
-				   hugoline is already visible on the screen
+				   line is already visible on the screen
                                 */
 				if ((unsigned)event.object >= window[active_window].count)
 				{
@@ -239,7 +237,7 @@ MainEventLoop:
 			case TAB:
 			{
 ToggleGameWindow:
-				if (during_input)	/* hugo_gethugoline() */
+				if (during_input)	/* hugo_getline() */
 				{
 					SwitchtoGame();
 					return;
@@ -275,8 +273,8 @@ DoNewAction:
 				{
 					if (game==NULL) break;
 
-					sprintf(debug_hugoline, "Restart %s?", gamefile);
-					DebugMessageBox("Restart", debug_hugoline);
+					sprintf(debug_line, "Restart %s?", gamefile);
+					DebugMessageBox("Restart", debug_line);
 					if (event.action==CANCEL)
 						break;
 
@@ -287,13 +285,13 @@ DoNewAction:
 					debugger_collapsing = 2;
 					var[endflag] = true;
 					during_input = false;
-					buffered_code_hugolines = FORCE_REDRAW;
+					buffered_code_lines = FORCE_REDRAW;
 					return;
 				}
 				case MENU_FILE + FILE_PRINT:
 				{
-					sprintf(debug_hugoline, "Print active window to %s", printer_name);
-					DebugMessageBox("Print", debug_hugoline);
+					sprintf(debug_line, "Print active window to %s", printer_name);
+					DebugMessageBox("Print", debug_line);
 					if (event.action!=CANCEL)
 						HardCopy();
 					break;
@@ -328,7 +326,7 @@ DoNewAction:
 					debugger_finish = true;
 
 					/* Force redraw */
-					buffered_code_hugolines = FORCE_REDRAW;
+					buffered_code_lines = FORCE_REDRAW;
 					window[VIEW_CALLS].changed = true;
 
 					/* Lose track of history*/
@@ -430,7 +428,7 @@ NotDuringInput:
 					debugger_has_stepped_back = true;
 
 					RecoverLastGood();
-					free(codehugoline[--window[CODE_WINDOW].count]);
+					free(codeline[--window[CODE_WINDOW].count]);
 					codeptr = code_history[history_last];
 					dbnest = dbnest_history[history_last];
 
@@ -534,8 +532,8 @@ NotDuringInput:
 
 				default:
 				{
-					sprintf(debug_hugoline, "Hugo Debugger v%d.%d%s", HEVERSION, HEREVISION, HEINTERIM);
-					DebugMessageBox(debug_hugoline, "Command not available");
+					sprintf(debug_line, "Hugo Debugger v%d.%d%s", HEVERSION, HEREVISION, HEINTERIM);
+					DebugMessageBox(debug_line, "Command not available");
 					break;
 				}
 			}

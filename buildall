@@ -14,6 +14,8 @@ cd $builddir
 cd glulxe
 mk install
 cd $builddir
-cd hugo/source
+cd hugo
+ape/patch -p1 <../hugo.patch
+cd source
 mk install
 cd $builddir

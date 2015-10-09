@@ -150,8 +150,8 @@ int CheckInitializer(int wordnum)
 
 		default:
 		{
-			sprintf(hugoline, "Illegal initializer:  %s", word[wordnum]);
-			Error(hugoline);
+			sprintf(line, "Illegal initializer:  %s", word[wordnum]);
+			Error(line);
 			return 0;
 		}
 	}
@@ -168,8 +168,8 @@ void CheckSymbol(char *a)
 	char *b = "";
 
 	if (strlen(a) > MAX_SYMBOL_LENGTH)
-		{sprintf(hugoline, "Symbol name \"%s\" too long", a);
-		Error(hugoline);
+		{sprintf(line, "Symbol name \"%s\" too long", a);
+		Error(line);
 		return;}
 
 	hash = FindHash(a);
@@ -244,8 +244,8 @@ void CheckSymbol(char *a)
 Checkb:
 	if (b[0]!='\0')
 	{
-		sprintf(hugoline, "\"%s\" previously defined as %s", a, b);
-		Error(hugoline);
+		sprintf(line, "\"%s\" previously defined as %s", a, b);
+		Error(line);
 	}
 }
 
@@ -281,8 +281,8 @@ void DefArray(void)
 
 	if (arrayctr==MAXARRAYS)
 		{arrayctr = MAXARRAYS-1;
-		sprintf(hugoline, "Maximum of %d arrays exceeded", MAXARRAYS);
-		Error(hugoline);}
+		sprintf(line, "Maximum of %d arrays exceeded", MAXARRAYS);
+		Error(line);}
 
 	/* Process any default array values, remembering them for writing
 	   in Pass3()
@@ -291,7 +291,7 @@ void DefArray(void)
 	{
 		unsigned int val;
 
-		if (!Expect(6, "=", "end of hugoline or array assignment(s)"))
+		if (!Expect(6, "=", "end of line or array assignment(s)"))
 			goto SkipAssign;
 		KillWord(6);	/* '=' */
 		RemoveCommas();
@@ -331,8 +331,8 @@ void DefAttribute(void)
 	{
 		if (IDWord(4)!=ATTR_T)
 		{
-			sprintf(hugoline, "Not an attribute:  %s", word[4]);
-			Error(hugoline);
+			sprintf(line, "Not an attribute:  %s", word[4]);
+			Error(line);
 		}
 		else
 		{
@@ -343,8 +343,8 @@ void DefAttribute(void)
 
 			if (aliasctr==MAXALIASES)
 				{attrctr = MAXALIASES-1;
-				sprintf(hugoline, "Maximum of %d aliases exceeded", MAXALIASES);
-				Error(hugoline);}
+				sprintf(line, "Maximum of %d aliases exceeded", MAXALIASES);
+				Error(line);}
 		}
 		KillWord(4);
 		KillWord(3);
@@ -357,8 +357,8 @@ void DefAttribute(void)
 
 		if (attrctr==MAXATTRIBUTES)
 			{attrctr = MAXATTRIBUTES-1;
-			sprintf(hugoline, "Maximum of %d attributes exceeded", MAXATTRIBUTES);
-			Error(hugoline);}
+			sprintf(line, "Maximum of %d attributes exceeded", MAXATTRIBUTES);
+			Error(line);}
 	}
 	if (words > 2) Error("Illegal attribute definition");
 }
@@ -393,8 +393,8 @@ void DefCompound(void)
 	if (++syncount==MAXSPECIALWORDS)
 	{
 		syncount--;
-		sprintf(hugoline, "Maximum of %d special words exceeded", MAXSPECIALWORDS);
-		Error(hugoline);
+		sprintf(line, "Maximum of %d special words exceeded", MAXSPECIALWORDS);
+		Error(line);
 	}
 }
 
@@ -422,8 +422,8 @@ void DefConstant(void)
 
 	if (constctr == MAXCONSTANTS)
 		{constctr = MAXCONSTANTS-1;
-		sprintf(hugoline, "Maximum of %d constants exceeded", MAXCONSTANTS);
-		Error(hugoline);}
+		sprintf(line, "Maximum of %d constants exceeded", MAXCONSTANTS);
+		Error(line);}
 }
 
 
@@ -502,8 +502,8 @@ void DefEnum(void)
 
 		else
 		{
-			sprintf(hugoline, "Syntax error in declaration:  %s", word[thisword]);
-			Error(hugoline);
+			sprintf(line, "Syntax error in declaration:  %s", word[thisword]);
+			Error(line);
 			thisword++;
 		}
 	}
@@ -515,7 +515,7 @@ void DefEnum(void)
 
 	while (word[1][0]!='}')
 	{
-		/* Get a hugoline and copy it, because it's going to
+		/* Get a line and copy it, because it's going to
 		   be changed.
 		*/
 		for (i=1; i<=words; i++)
@@ -530,7 +530,7 @@ void DefEnum(void)
 			word[words++] = "=";
 
 		/* Count the number of words to be deleted from
-		   the original hugoline.
+		   the original line.
 		*/
 		j = 2;
 
@@ -567,7 +567,7 @@ void DefEnum(void)
 			}
 		}
 
-		/* Discrete values in a hugoline of code must be positive
+		/* Discrete values in a line of code must be positive
 		   integers
 		*/
 		if (val < 0)
@@ -633,8 +633,8 @@ void DefGlobal(void)
 	globalctr++;
 	if (globalctr == MAXGLOBALS)
 		{globalctr = MAXGLOBALS-1;
-		sprintf(hugoline, "Maximum of %d globals exceeded", MAXGLOBALS);
-		Error(hugoline);}
+		sprintf(line, "Maximum of %d globals exceeded", MAXGLOBALS);
+		Error(line);}
 }
 
 
@@ -659,8 +659,8 @@ void DefLocals(int asargs)
 		if (localctr==MAXLOCALS)
 		{
 			localctr = MAXLOCALS-1;
-			sprintf(hugoline, "Maximum of %d locals exceeded", MAXLOCALS);
-			Error(hugoline);
+			sprintf(line, "Maximum of %d locals exceeded", MAXLOCALS);
+			Error(line);
 			return;
 		}
 
@@ -730,7 +730,7 @@ void DefOther(void)
 	char other[33], oname[33];
 	int i;
 	int blank = 0;
-	int starting_hugoline = totalhugolines;
+	int starting_line = totallines;
 
 	/* Linking is illegal after definitions */
 	if (!linked) linked = FAILED;
@@ -801,11 +801,11 @@ void DefOther(void)
 
 				if (labelctr == MAXLABELS)
 					{labelctr = MAXLABELS-1;
-					sprintf(hugoline, "Maximum of %d labels exceeded", MAXLABELS);
-					Error(hugoline);}
+					sprintf(line, "Maximum of %d labels exceeded", MAXLABELS);
+					Error(line);}
 
 				if (strcmp(word[3], ""))
-					Error("New hugoline expected after label");
+					Error("New line expected after label");
 			}
 
 			for (i=1; i<=words; i++)
@@ -815,7 +815,7 @@ void DefOther(void)
 			}
 		}
 
-		/* Check for suspicious number of blank hugolines.  32 hugolines of
+		/* Check for suspicious number of blank lines.  32 lines of
 		   white space is a bit much to intentionally leave in a
 		   program, don't you think?
 		*/
@@ -825,13 +825,13 @@ void DefOther(void)
 			if (blank > 32)
 			{
 NoClosingBrace:
-				sprintf(hugoline, "Closing brace missing in %s:  %s", other, oname);
+				sprintf(line, "Closing brace missing in %s:  %s", other, oname);
 
 				/* Force termination */
 				aborterror = true;
-				totalhugolines = starting_hugoline;
+				totallines = starting_line;
 
-				Error(hugoline);
+				Error(line);
 			}
 		}
 	} while (nest > 0);
@@ -868,8 +868,8 @@ void DefProperty(void)
 	{
 		if (IDWord(4)!=PROP_T)
 		{
-			sprintf(hugoline, "Not a property:  %s", word[4]);
-			Error(hugoline);
+			sprintf(line, "Not a property:  %s", word[4]);
+			Error(line);
 		}
 		else
 		{
@@ -880,8 +880,8 @@ void DefProperty(void)
 
 			if (aliasctr==MAXALIASES)
 				{attrctr = MAXALIASES-1;
-				sprintf(hugoline, "Maximum of %d aliases exceeded", MAXALIASES);
-				Error(hugoline);}
+				sprintf(line, "Maximum of %d aliases exceeded", MAXALIASES);
+				Error(line);}
 		}
 		KillWord(4);
 		KillWord(3);
@@ -907,8 +907,8 @@ void DefProperty(void)
 
 		if (propctr==MAXPROPERTIES)
 			{attrctr = MAXPROPERTIES-1;
-			sprintf(hugoline, "Maximum of %d properties exceeded", MAXPROPERTIES);
-			Error(hugoline);}
+			sprintf(line, "Maximum of %d properties exceeded", MAXPROPERTIES);
+			Error(line);}
 	}
 
 	if (words > 2) Error("Illegal property definition");
@@ -942,8 +942,8 @@ void DefRemovals(void)
 		if (++syncount==MAXSPECIALWORDS)
 		{
 			syncount--;
-			sprintf(hugoline, "Maximum of %d special words exceeded", MAXSPECIALWORDS);
-			Error(hugoline);
+			sprintf(line, "Maximum of %d special words exceeded", MAXSPECIALWORDS);
+			Error(line);
 		}
 
 		KillWord(2);
@@ -977,8 +977,8 @@ void DefSynonym(void)
 	if (++syncount==MAXSPECIALWORDS)
 	{
 		syncount--;
-		sprintf(hugoline, "Maximum of %d special words exceeded", MAXSPECIALWORDS);
-		Error(hugoline);
+		sprintf(line, "Maximum of %d special words exceeded", MAXSPECIALWORDS);
+		Error(line);
 	}
 }
 

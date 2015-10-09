@@ -13,7 +13,6 @@
 
 	by ct
 ---------------------------------------------------------------------------*/
-#define GCC_UNIX
 
 #if defined (ACORN)
 
@@ -108,6 +107,9 @@ char *itoa(int a, char *buf, int base);
 char *strupr(char *s);
 char *strlwr(char *s);
 
+#ifndef malloc
+#define malloc(a) AmigaMalloc(a)
+#endif
 
 #endif  /* defined (AMIGA) */
 
@@ -140,17 +142,17 @@ char *strlwr(char *s);
 #define DEFAULT_VALUE_TEXT      12      /* light red     */
 #define DEFAULT_VARIABLE_TEXT   15      /* bright white  */
 
-/* PC Extended-ASCII hugoline-drawing characters (could be replaced
+/* PC Extended-ASCII line-drawing characters (could be replaced
    with regular ASCII characters, i.e., '-', '+', and '|')
 */
-#define HORIZONTAL_LINE         'ï¿½'
-#define HORIZONTAL_LEFT         'ï¿½'
-#define HORIZONTAL_RIGHT        'ï¿½'
-#define VERTICAL_LINE           'ï¿½'
-#define TOP_LEFT                'ï¿½'
-#define TOP_RIGHT               'ï¿½'
-#define BOTTOM_LEFT             'ï¿½'
-#define BOTTOM_RIGHT            'ï¿½'
+#define HORIZONTAL_LINE         'Ä'
+#define HORIZONTAL_LEFT         'Ã'
+#define HORIZONTAL_RIGHT        '´'
+#define VERTICAL_LINE           '³'
+#define TOP_LEFT                'Ú'
+#define TOP_RIGHT               '¿'
+#define BOTTOM_LEFT             'À'
+#define BOTTOM_RIGHT            'Ù'
 
 #define MENUBAR_KEY "ALT"               /* name of menubar activation key */
 
@@ -343,17 +345,17 @@ void PrintFatalDebuggerError(char *a);
 #define DEFAULT_VALUE_TEXT      12      /* light red     */
 #define DEFAULT_VARIABLE_TEXT   15      /* bright white  */
 
-/* PC Extended-ASCII hugoline-drawing characters (could be replaced
+/* PC Extended-ASCII line-drawing characters (could be replaced
    with regular ASCII characters, i.e., '-', '+', and '|')
 */
-#define HORIZONTAL_LINE         'ï¿½'
-#define HORIZONTAL_LEFT         'ï¿½'
-#define HORIZONTAL_RIGHT        'ï¿½'
-#define VERTICAL_LINE           'ï¿½'
-#define TOP_LEFT                'ï¿½'
-#define TOP_RIGHT               'ï¿½'
-#define BOTTOM_LEFT             'ï¿½'
-#define BOTTOM_RIGHT            'ï¿½'
+#define HORIZONTAL_LINE         'Ä'
+#define HORIZONTAL_LEFT         'Ã'
+#define HORIZONTAL_RIGHT        '´'
+#define VERTICAL_LINE           '³'
+#define TOP_LEFT                'Ú'
+#define TOP_RIGHT               '¿'
+#define BOTTOM_LEFT             'À'
+#define BOTTOM_RIGHT            'Ù'
 
 #define MENUBAR_KEY "ALT"               /* name of menubar activation key */
 
@@ -493,7 +495,7 @@ void debug_switchscreen(int screen);
 void debug_windowbottomrow(char *caption);
 void debug_windowrestore(void *buf, int xpos, int ypos);
 void *debug_windowsave(int left, int top, int right, int bottom);
-void debug_windowscroll(int left, int top, int right, int bottom, int param, int hugolines);
+void debug_windowscroll(int left, int top, int right, int bottom, int param, int lines);
 void debug_windowshadow(int left, int top, int right, int bottom);
 
 
@@ -515,7 +517,7 @@ int int_strlen(int *a);
 void int_strcpy(int *a, int *b);
 
 extern char format_nesting;
-extern char screen_hugoline[];
+extern char screen_line[];
 
 
 /* hdmisc.c */

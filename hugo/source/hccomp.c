@@ -23,7 +23,7 @@ int ifsetnest = 0;
 
 void CompilerDirective(void)
 {
-	char source[4096];
+	char source[MAXPATH];
 	int temptotal;
 	double testver, comparever;
 	long sourcepos;
@@ -57,13 +57,13 @@ void CompilerDirective(void)
 
 			if (testver > comparever)
 			{
-				sprintf(hugoline, "?File requires compiler version %s", word[2]);
-				Error(hugoline);
+				sprintf(line, "?File requires compiler version %s", word[2]);
+				Error(line);
 			}
 			else if (testver < comparever)
 			{
-				sprintf(hugoline, "?Compiler is v%d.%d; file is only v%s", HCVERSION, HCREVISION, word[2]);
-				Error(hugoline);
+				sprintf(line, "?Compiler is v%d.%d; file is only v%s", HCVERSION, HCREVISION, word[2]);
+				Error(line);
 			}
 		}
 	}
@@ -73,8 +73,8 @@ void CompilerDirective(void)
 		if (!strcmp(word[2], "warning"))
 		{
 			StripQuotes(word[3]);
-			sprintf(hugoline, "?%s", word[3]);
-			Error(hugoline);
+			sprintf(line, "?%s", word[3]);
+			Error(line);
 		}
 		else if (!strcmp(word[2], "error"))
 		{
@@ -108,13 +108,13 @@ void CompilerDirective(void)
 		if (ferror(sourcefile)) FatalError(READ_E, sourcefilename);
 		fclose(sourcefile);
 
-		temptotal = totalhugolines;
-		totalhugolines = 0;
+		temptotal = totallines;
+		totallines = 0;
 
 		if (percent)
-			{sprintf(hugoline, "\rCompiling       hugolines of %s", sourcefilename);
-			strnset(hugoline+26, ' ', strlen(sourcefilename));
-			printf(hugoline);}
+			{sprintf(line, "\rCompiling       lines of %s", sourcefilename);
+			strnset(line+26, ' ', strlen(sourcefilename));
+			printf(line);}
 
 		strcpy(sourcefilename, word[2]);
 		if (!(sourcefile = TrytoOpen(sourcefilename, "rb", "source")))
@@ -129,19 +129,19 @@ void CompilerDirective(void)
 			printf("\n");
 			if (listing)
 			{
-				if (fprintf(listfile, "Compiling %5d hugolines of %s\n", totalhugolines, sourcefilename) < 0)
+				if (fprintf(listfile, "Compiling %5d lines of %s\n", totallines, sourcefilename) < 0)
 					FatalError(WRITE_E, listfilename);
 			}
 #if defined (STDPRN_SUPPORTED)
 			if (printer)
 			{
-				if (fprintf(stdprn, "Compiling %5d hugolines of %s\n", totalhugolines, sourcefilename) < 0)
+				if (fprintf(stdprn, "Compiling %5d lines of %s\n", totallines, sourcefilename) < 0)
 					FatalError(WRITE_E, "printer");
 			}
 #endif
 		}
 
-		totalhugolines = temptotal;
+		totallines = temptotal;
 		if (fclose(sourcefile)==EOF) FatalError(READ_E, sourcefilename);
 		strcpy(sourcefilename, source);
 		if (!(sourcefile = HUGO_FOPEN(sourcefilename, "rb"))) FatalError(OPEN_E, sourcefilename);
@@ -196,8 +196,8 @@ CheckConditions:
 		{
 IfSetError:
 			ifsetnest = MAXIFSETNEST-1;
-			sprintf(hugoline, "#if nested more than %d deep", MAXIFSETNEST-1);
-			Error(hugoline);
+			sprintf(line, "#if nested more than %d deep", MAXIFSETNEST-1);
+			Error(line);
 			return;
 		}
 
@@ -336,7 +336,7 @@ void CompilerMem(void)
 		}
 		else
 		{
-			Error("Illegal inhugoline limit setting");
+			Error("Illegal inline limit setting");
 			return;
 		}
 	}
@@ -475,8 +475,8 @@ void CompilerMem(void)
 
 	if (strcmp(e, ""))              /* if there was an error */
 	{
-		sprintf(hugoline, "%s already defined", e);
-		Error(hugoline);
+		sprintf(line, "%s already defined", e);
+		Error(line);
 	}
 	else
 	{
@@ -493,8 +493,8 @@ void CompilerSet(void)
 	int i;
 
 	if (strlen(word[2]) > 32)
-		{sprintf(hugoline, "Flag name \"%s\" too long", word[2]);
-		Error(hugoline);
+		{sprintf(line, "Flag name \"%s\" too long", word[2]);
+		Error(line);
 		return;}
 
 	if (!strcmp(word[1], "#set"))
@@ -506,15 +506,15 @@ void CompilerSet(void)
 				free(sets[i]);
 				sets[i] = MakeString(word[2]);
 				/* In case this came from the non-
-				   lowercased command hugoline:
+				   lowercased command line:
 				*/
 				strlwr(sets[i]);
 				return;
 			}
 		}
 
-		sprintf(hugoline, "Maximum of %d compiler flags exceeded", MAXFLAGS);
-		Error(hugoline);
+		sprintf(line, "Maximum of %d compiler flags exceeded", MAXFLAGS);
+		Error(line);
 	}
 	if (!strcmp(word[1], "#clear"))
 	{
@@ -528,7 +528,7 @@ void CompilerSet(void)
 			}
 		}
 
-		sprintf(hugoline, "Flag not set:  %s", word[2]);
-		Error(hugoline);
+		sprintf(line, "Flag not set:  %s", word[2]);
+		Error(line);
 	}
 }

@@ -13,7 +13,7 @@
 		hugo_closefiles         hugo_settextcolor
 					hugo_setbackcolor
 		hugo_getkey             hugo_color
-		hugo_gethugoline
+		hugo_getline
 		hugo_waitforkey         hugo_print
 		hugo_iskeywaiting	hugo_charwidth
 		hugo_timewait		hugo_textwidth
@@ -41,14 +41,12 @@
 #include "heheader.h"
 
 /* For the stdio version, the ARBITRARY_SCREEN_WIDTH must be equal
-   to the width of the target text display in order for proper hugoline-
-   wrapping (since printf() wraps the hugoline automatically at the
+   to the width of the target text display in order for proper line-
+   wrapping (since printf() wraps the line automatically at the
    right edge)
 */
 #define ARBITRARY_SCREEN_WIDTH 80
 #define ARBITRARY_SCREEN_HEIGHT 24
-#define STAT_UNAVAILABLE	((short)-1)
-
 
 
 /* Function prototypes: */
@@ -79,7 +77,7 @@ int hugo_hasgraphics(void);
 #define HUGO_BRIGHT_WHITE  15
 
 /* Since we provide our own command history: */
-#define HISTORY_SIZE    16              /* for command-hugoline editing */
+#define HISTORY_SIZE    16              /* for command-line editing */
 int hcount = 0;
 char *history[HISTORY_SIZE];
 
@@ -180,7 +178,7 @@ void hugo_makepath(char *path, char *drive, char *dir, char *fname, char *ext)
 /* hugo_getfilename
 
     Loads the name of the filename to save or restore (as specified by
-    the argument <a>) into the hugoline[] array.
+    the argument <a>) into the line[] array.
 
     The reason this is in the system-specific file is because it may be
     preferable to replace it with, for example, a dialog-based file
@@ -191,12 +189,12 @@ void hugo_getfilename(char *a, char *b)
 {
 	unsigned int i, p;
 
-	sprintf(hugoline, "Enter path and filename %s.", a);
+	sprintf(line, "Enter path and filename %s.", a);
 
-	AP(hugoline);
+	AP(line);
 
-	sprintf(hugoline,"%c(Default is %s): \\;", NO_CONTROLCHAR, b);
-	AP(hugoline);
+	sprintf(line,"%c(Default is %s): \\;", NO_CONTROLCHAR, b);
+	AP(line);
 
 	p = var[prompt];
 	var[prompt] = 0;        /* null string */
@@ -207,13 +205,13 @@ void hugo_getfilename(char *a, char *b)
 
 	remaining = 0;
 
-	strcpy(hugoline, "");
+	strcpy(line, "");
 	if (words==0)
-		strcpy(hugoline, b);
+		strcpy(line, b);
 	else
 	{
 		for (i=1; i<=(unsigned int)words; i++)
-			strcat(hugoline, word[i]);
+			strcat(line, word[i]);
 	}
 }
 
@@ -308,12 +306,12 @@ int hugo_getkey(void)
 }
 
 
-/* hugo_gethugoline
+/* hugo_getline
 
-    Gets a hugoline of input from the keyboard, storing it in <buffer>.
+    Gets a line of input from the keyboard, storing it in <buffer>.
 */
 
-void hugo_gethugoline(char *p)
+void hugo_getline(char *p)
 {
 	/* stdio implementation */
 	hugo_print(p);
@@ -381,10 +379,10 @@ int hugo_timewait(int n)
 
    The currently selected font's width and height:
 
-	charwidth, hugolineheight
+	charwidth, lineheight
 
    The non-proportional/fixed-width font's width and height (i.e., equal
-   to charwidth and hugolineheight when the current font is the fixed-width
+   to charwidth and lineheight when the current font is the fixed-width
    font):
 
 	FIXEDCHARWIDTH, FIXEDLINEHEIGHT
@@ -392,7 +390,7 @@ int hugo_timewait(int n)
    Must be set by hugo_settextpos(), hugo_clearfullscreen(), and
    hugo_clearwindow():
 
-	currentpos, currenthugoline
+	currentpos, currentline
 */
 
 void hugo_init_screen(void)
@@ -430,7 +428,7 @@ void hugo_clearfullscreen(void)
 	
 	/* Must be set: */
 	currentpos = 0;
-	currenthugoline = 1;
+	currentline = 1;
 }
 
 void hugo_clearwindow(void)
@@ -442,7 +440,7 @@ void hugo_clearwindow(void)
 
 	/* Must be set: */
 	currentpos = 0;
-	currenthugoline = 1;
+	currentline = 1;
 }
 
 void hugo_settextmode(void)
@@ -473,14 +471,14 @@ void hugo_settextmode(void)
 	Then set:
 	
 	charwidth = current font width, in pixels or 1
-	hugolineheight = current font height, in pixels or 1
+	lineheight = current font height, in pixels or 1
 
-	Both charwidth and hugolineheight must change dynamically if the
+	Both charwidth and lineheight must change dynamically if the
 	metrics for the currently selected font change
 */
 
 	/* stdio implementation: */
-	charwidth = hugolineheight = FIXEDCHARWIDTH = FIXEDLINEHEIGHT = 1;
+	charwidth = lineheight = FIXEDCHARWIDTH = FIXEDLINEHEIGHT = 1;
 	SCREENWIDTH = ARBITRARY_SCREEN_WIDTH;
 	SCREENHEIGHT = ARBITRARY_SCREEN_HEIGHT;
 
@@ -509,10 +507,10 @@ void hugo_settextwindow(int left, int top, int right, int bottom)
 	
 	/* No window setting under stdio, but print a separator: */
 #ifndef NO_STDIO_WINDOWS
-	hugoline[0] = '\n';
-	memset(hugoline+1, '-', ARBITRARY_SCREEN_WIDTH);
-	hugoline[ARBITRARY_SCREEN_WIDTH+1] = '\0';
-	printf(hugoline);
+	line[0] = '\n';
+	memset(line+1, '-', ARBITRARY_SCREEN_WIDTH);
+	line[ARBITRARY_SCREEN_WIDTH+1] = '\0';
+	printf(line);
 #endif
 
 	/* Must be set: */
@@ -549,8 +547,8 @@ void hugo_settextpos(int x, int y)
 
    All cursor-location is based on FIXEDCHARWIDTH and FIXEDLINEHEIGHT.
 
-   This function must also properly set currenthugoline and currentpos (where
-   currenthugoline is a the current character hugoline, and currentpos may be
+   This function must also properly set currentline and currentpos (where
+   currentline is a the current character line, and currentpos may be
    either in pixels or characters, depending on the measure being used).
 
    Note that the Hugo function call uses x and y directly as text-
@@ -564,7 +562,7 @@ void hugo_settextpos(int x, int y)
 	if (inwindow) printf(" ");
 
 	/* Must be set: */
-	currenthugoline = y;
+	currentline = y;
 	currentpos = (x-1)*charwidth;   /* Note:  zero-based */
 }
 
@@ -574,10 +572,10 @@ void hugo_print(char *a)
    generally doesn't take into account color setting, font changes,
    windowing, etc.
 
-   The newhugoline character '\n' must be explicitly included at the end of
-   a hugoline in order to produce a hugolinefeed.  The new cursor position is set
+   The newline character '\n' must be explicitly included at the end of
+   a line in order to produce a linefeed.  The new cursor position is set
    to the end of this printed text.  Upon hitting the right edge of the
-   screen, the printing position wraps to the start of the next hugoline.
+   screen, the printing position wraps to the start of the next line.
 */
 
 	/* Output <a>, taking into account fore/background color,
@@ -593,7 +591,7 @@ void hugo_print(char *a)
 
 void hugo_scrollwindowup()
 {
-	/* Scroll the current text window up one hugoline */
+	/* Scroll the current text window up one line */
 	
 	/* stdio implementation */
 	printf("\n");
@@ -604,7 +602,7 @@ void hugo_font(int f)
 /* The <f> argument is a mask containing any or none of:
    BOLD_FONT, UNDERLINE_FONT, ITALIC_FONT, PROP_FONT.
 
-   If charwidth and hugolineheight change with a font change, these must be
+   If charwidth and lineheight change with a font change, these must be
    reset here as well.
 */
 

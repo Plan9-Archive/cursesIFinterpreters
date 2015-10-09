@@ -361,7 +361,7 @@ void TB_Scroll()
 
 		/* Remove first the cells which will be scrolled away */
 		if (TB_InBounds(i, physical_windowleft, physical_windowtop,
-			physical_windowright, physical_windowtop+hugolineheight/2))
+			physical_windowright, physical_windowtop+lineheight/2))
 		{
 #ifdef TB_DEBUG
 			printf("TB_Scroll(): ");
@@ -370,14 +370,14 @@ void TB_Scroll()
 		}
 
 		/* Then scroll up the remaining cells */
-		if (TB_InBounds(i, physical_windowleft, physical_windowtop+hugolineheight,
+		if (TB_InBounds(i, physical_windowleft, physical_windowtop+lineheight,
 			physical_windowright, physical_windowbottom))
 		{
 #ifdef TB_DEBUG
 //			printf("TB_Scroll(): scrolling tb_list[%d]: '%s'\n", i, tb_list[i].data);
 #endif
-			tb_list[i].top -= hugolineheight;
-			tb_list[i].bottom -= hugolineheight;
+			tb_list[i].top -= lineheight;
+			tb_list[i].bottom -= lineheight;
 			
 			/* Don't scroll areas into the invalidation zone until the
 			   bottom is invalidated

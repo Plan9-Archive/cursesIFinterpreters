@@ -23,7 +23,7 @@ char hex[7];                    /* string for hex output           */
 /* BEGINCODEBLOCK
 
 	Begins a new block of code, whether or not it is actually
-	enclosed in "{...}", since a single hugoline following an 'if'
+	enclosed in "{...}", since a single line following an 'if'
 	or 'window', etc. may not be.
 */
 
@@ -52,7 +52,7 @@ void CodeDo(void)
 {
 	long loopptr, returnpos, tempptr, skipaddr;
 
-	Expect(2, "NULL", "new hugoline following:  do");
+	Expect(2, "NULL", "new line following:  do");
 
 	WriteCode(DO_T, 1);
 	returnpos = codeptr;
@@ -358,36 +358,36 @@ void CodeIf(void)
 
 /* CODELINE
 
-	Compiles the hugoline currently loaded in word[].  A brief overview is:
+	Compiles the line currently loaded in word[].  A brief overview is:
 
-		1.  Do any start-of-hugoline analysis
-		2.  Loop through the hugoline word-by-word
+		1.  Do any start-of-line analysis
+		2.  Loop through the line word-by-word
 			- Check current state/adjustments
 			- Main section:  Code tokens appropriately,
 			  setting up syntax flags
 			- Throw up any current-word errors
-		3.  Throw up any end-of-hugoline errors
-		4.  Do any end-of-hugoline adjustments
+		3.  Throw up any end-of-line errors
+		4.  Do any end-of-line adjustments
 */
 
 #define SOME_VALUE	(-1)
 
-char halfhugoline;			/* for ending with "and" or "or"  */
+char halfline;			/* for ending with "and" or "or"  */
 
 void CodeLine(void)
 {
 	int enternest;			/* initial nest level		  */
-	char eol = 0, scolon = 0;       /* flags for end-of-hugoline coding   */
+	char eol = 0, scolon = 0;       /* flags for end-of-line coding   */
 	char assign = 0;                /* when '=' is required (or 'is') */
 	char assignment = 0;		/* when an assignment is coded 	  */
 	int evalue = 0;                 /* expecting a value              */
 	char isneedsval = 0;		/* if 'is' needs a value	  */
 	int invalid_is_val = 0;		/* if "is..." deserves a warning  */
-	char ihugoline = 0;                 /* illegal at start of hugoline 	  */
-	char ehugoline = 0;                 /* illegal at end of hugoline         */
-	char thugoline = 0;                 /* text-only hugoline 		  */
-	char ghugoline = 0;			/* a grammar-definition hugoline 	  */
-	int nhugoline = 0;                  /* expecting newhugoline before 	  */
+	char iline = 0;                 /* illegal at start of line 	  */
+	char eline = 0;                 /* illegal at end of line         */
+	char tline = 0;                 /* text-only line 		  */
+	char gline = 0;			/* a grammar-definition line 	  */
+	int nline = 0;                  /* expecting newline before 	  */
 	char glegal;			/* legal grammar token 		  */
 	char pexpr = 0;			/* possible expression 		  */
 	char expr = 0;     		/* if expression is allowed 	  */
@@ -412,7 +412,7 @@ void CodeLine(void)
 	int lastt = 0;			/* last token, or SOME_VALUE 	  */
 	int nextt = 0;			/* counting non-values		  */
 	int firstvalue = 0;             /* set to token # of value if
-					     first token in hugoline 	  */
+					     first token in line 	  */
 
 	long verbskipaddr = 0, tempptr, skipptr;
 	int i;
@@ -420,9 +420,9 @@ void CodeLine(void)
 
 
 	enternest = nest;
-	halfhugoline = false;
+	halfline = false;
 
-	/* If hugoline starts with a label */
+	/* If line starts with a label */
 	if (word[1][0]=='~')
 	{
 		Boundary();
@@ -439,11 +439,11 @@ void CodeLine(void)
 	{
 		t = IDWord(i);
 
-		/* If this is a continuation of a previous hugoline, the
+		/* If this is a continuation of a previous line, the
 		   first word might get mistaken for printed text (i.e.,
 		   from the text bank) instead of a dictionary entry.
 		*/
-		if (halfhugoline)
+		if (halfline)
 			if (t==TEXTDATA_T) t = DICTENTRY_T;
 
 
@@ -461,14 +461,14 @@ void CodeLine(void)
 			}
 		}
 
-		ehugoline = 0;
+		eline = 0;
 		glegal = 0;
 
 		if (eol==1 && i==words && token[t][0]=='}')
 			{WriteCode(EOL_T, 1);
 			eol = 0;}
 
-		/* For verb grammar definition hugolines: */
+		/* For verb grammar definition lines: */
 		if (i==1 && token[t][0]=='*')
 			verbskipaddr = codeptr + 1;
 
@@ -479,8 +479,8 @@ void CodeLine(void)
 			case OPEN_BRACKET_T:
 			{
 				brackets++;
-				ihugoline = 1;
-				ehugoline = 1;
+				iline = 1;
+				eline = 1;
 				nextt = 0;
 				glegal = 1;
 				lastt = 0;
@@ -495,7 +495,7 @@ void CodeLine(void)
 			case CLOSE_BRACKET_T:
 			{
 				brackets--;
-				ihugoline = 1;
+				iline = 1;
 				glegal = 1;
 				lastt = SOME_VALUE;
 
@@ -520,8 +520,8 @@ void CodeLine(void)
 					if ((assign) && !assignment)
 						firstvalue = t;
 
-				ihugoline = 1;
-				ehugoline = 1;
+				iline = 1;
+				eline = 1;
 
 				/* If array[]--used to get the size of an
 				   array...
@@ -533,7 +533,7 @@ void CodeLine(void)
 
 					WriteCode(CLOSE_SQUARE_T, 1);
 					i++;
-					ehugoline = 0;
+					eline = 0;
 					lastt = SOME_VALUE;
 				}
 
@@ -550,7 +550,7 @@ void CodeLine(void)
 			case CLOSE_SQUARE_T:
 			{
 				sbrackets--;
-				ihugoline = 1;
+				iline = 1;
 				lastt = SOME_VALUE;
 				if (subscript) subscript--;
                                 goto NextWord;
@@ -558,16 +558,16 @@ void CodeLine(void)
 
 			case DICTENTRY_T:
 			{
-				if (lastt==SOME_VALUE && !ghugoline) oporsep = i;
+				if (lastt==SOME_VALUE && !gline) oporsep = i;
 
 				WriteCode((unsigned int)token_val, 2);
-				ihugoline = 1;
+				iline = 1;
 				lastt = SOME_VALUE;
 				nextt = 0;
 				glegal = 1;
 				evalue = 0;
 
-				if (!ghugoline) goto NextWord;
+				if (!gline) goto NextWord;
 
 				break;
 			}
@@ -577,7 +577,7 @@ void CodeLine(void)
 				if (lastt==SOME_VALUE) oporsep = i;
 
 				WriteCode((unsigned int)token_val, 2);
-				if (i==1 && !halfhugoline)
+				if (i==1 && !halfline)
 					{eol = 1;
 					assign = 1;}
 
@@ -594,12 +594,12 @@ void CodeLine(void)
 				
 				else if (lastt==IS_T || lastt==NOT_T)
 				{
-					sprintf(hugoline, "?Property \"%s\" used as attribute", word[i]);
-					Error(hugoline);
+					sprintf(line, "?Property \"%s\" used as attribute", word[i]);
+					Error(line);
 				}
 
 				WriteCode((unsigned int)token_val, 1);
-				ihugoline = 1;
+				iline = 1;
 				nextt = 0;
                                 evalue = 0;
 				lastt = SOME_VALUE;
@@ -612,12 +612,12 @@ void CodeLine(void)
 
 				else if (lastt==DECIMAL_T)
 				{
-					sprintf(hugoline, "?Attribute \"%s\" used as property", word[i]);
-					Error(hugoline);
+					sprintf(line, "?Attribute \"%s\" used as property", word[i]);
+					Error(line);
 				}
 
 				WriteCode((unsigned int)token_val, 1);
-				ihugoline = 1;
+				iline = 1;
 				nextt = 0;
                                 glegal = 1;
 				evalue = 0;
@@ -639,8 +639,8 @@ void CodeLine(void)
 #endif
 			{
 				eol = 1;
-				if (t != RETURN_T) ehugoline = 1;
-				nhugoline = i;
+				if (t != RETURN_T) eline = 1;
+				nline = i;
 				if (t!=PRINT_T && t!=RETURN_T) evalue = i;
 				break;
 			}
@@ -649,11 +649,11 @@ void CodeLine(void)
 			{
 				if (lastt==SOME_VALUE) oporsep = i;
 
-				if (i==1 && !halfhugoline)
+				if (i==1 && !halfline)
 					{eol = 1;
 					assign = 1;}
 				nextt = 1;
-				ehugoline = 1;
+				eline = 1;
 				evalue = i;
 				subscript++;
 				break;
@@ -675,8 +675,8 @@ void CodeLine(void)
 			}
 			case RUN_T:
 			{
-				ehugoline = 1;
-				nhugoline = i;
+				eline = 1;
+				nline = i;
 				evalue = i;
 				eol = true;
 				if (t==RUN_T) singleval = true;
@@ -697,20 +697,20 @@ void CodeLine(void)
 			{
 				WriteCode((unsigned int)(token_val/65536), 1);
 				WriteCode((unsigned int)(token_val%65536), 2);
-				thugoline = true;
+				tline = true;
 				scolon = true;	 /* trailing semicolon OK */
 				break;
 			}
 
 			case VAR_T:
 			{
-				if (lastt==SOME_VALUE && !ghugoline) oporsep = i;
+				if (lastt==SOME_VALUE && !gline) oporsep = i;
 				
 				else if (token_val<ENGINE_GLOBALS &&
 					(lastt==DECIMAL_T || lastt==IS_T))
 				{
-					sprintf(hugoline, "?Improper use of predefined global \"%s\"", word[i]);
-					Error(hugoline);
+					sprintf(line, "?Improper use of predefined global \"%s\"", word[i]);
+					Error(line);
 				}
 
 				WriteCode((unsigned int)token_val, 1);
@@ -719,7 +719,7 @@ void CodeLine(void)
 
 				lastt = SOME_VALUE;
 
-				if (i==1 && !halfhugoline)
+				if (i==1 && !halfline)
 				{
 					assign = 1;
                                         eol = 1;
@@ -732,7 +732,7 @@ void CodeLine(void)
 			}
 
 			case CHILDREN_T:
-				ihugoline = 1;
+				iline = 1;
 			case PARENT_T:
 				if (t==PARENT_T && word[i+1][0]!='(' && word[1][0]=='*') glegal = 1;
 			case SIBLING_T:
@@ -751,10 +751,10 @@ void CodeLine(void)
 					  Expect(i+1, "( )", "system function number in parentheses");
 					parambrackets = (char)(brackets+1), paramlist++;
 				}
-				if (!glegal && i==1 && !halfhugoline && t!=SYSTEM_T)
+				if (!glegal && i==1 && !halfline && t!=SYSTEM_T)
 					{eol = 1;
 					assign = 1;}
-				ehugoline = 1;
+				eline = 1;
 				nextt = 0;
 				evalue = 0;
 				break;
@@ -762,10 +762,10 @@ void CodeLine(void)
 
 			case WORD_T:
 			{
-				if (!ghugoline)
+				if (!gline)
                                         Expect(i+1, "[ ]", "word number in brackets");
 				else glegal = true;
-				if (i==1 && !halfhugoline)
+				if (i==1 && !halfline)
 					{eol = 1;
 					assign = 1;}
 				nextt = 0;
@@ -778,7 +778,7 @@ void CodeLine(void)
 			{
 				if (lastt==SOME_VALUE)
 				{
-					if (!ghugoline && !incompprop) oporsep = i;
+					if (!gline && !incompprop) oporsep = i;
 				}
 
 				if (incompprop)
@@ -814,8 +814,8 @@ void CodeLine(void)
 				if ((words>2 && word[words][0]!='}') ||
 					(i>1 && strcmp(word[1], "jump")))
 				{
-					sprintf(hugoline, "Improper use of label:  %s", word[i]);
-					Error(hugoline);
+					sprintf(line, "Improper use of label:  %s", word[i]);
+					Error(line);
 				}
 				evalue = 0;
 				break;
@@ -834,7 +834,7 @@ void CodeLine(void)
 
 				lastt = SOME_VALUE;
 				nextt = 0;
-                                ihugoline = 1;
+                                iline = 1;
 				evalue = 0;
 				goto NextWord;
 			}
@@ -844,7 +844,7 @@ void CodeLine(void)
 				if (lastt==SOME_VALUE) oporsep = i;
 
 				WriteCode((unsigned int)token_val, 2);
-				if (i==1 && !halfhugoline)
+				if (i==1 && !halfline)
 					{eol = 1;
 					assign = 1;}
 				nextt = 0;
@@ -860,7 +860,7 @@ void CodeLine(void)
 				Expect(i+1, "( )", "limit in parentheses");
 					parambrackets = (char)(brackets+1), paramlist++;
 
-				ihugoline = 1;
+				iline = 1;
 				nextt = 0;
 				evalue = 0;
 				break;
@@ -874,11 +874,11 @@ void CodeLine(void)
 			case RUNEVENTS_T:
 			case CLS_T:
 			{
-				nhugoline = i;
+				nline = i;
 				if ((words > 1) && (word[2][0]!='}' || t==ELSE_T))
 				{
-					sprintf(hugoline, "Expecting end of hugoline after token:  %s", word[i]);
-					Error(hugoline);
+					sprintf(line, "Expecting end of line after token:  %s", word[i]);
+					Error(line);
 				}
 				break;
 			}
@@ -931,11 +931,11 @@ void CodeLine(void)
 			case TILDE_T:
 			case NOT_T:
 			{
-				ihugoline = 1;
+				iline = 1;
 				nextt = 1;
 				if (t!=EQUALS_T)
 				{
-					ehugoline = 1;
+					eline = 1;
 					evalue = i;
 
 					if ((t==IS_T) && lastt!=SOME_VALUE)
@@ -947,8 +947,8 @@ void CodeLine(void)
 
 			case COMMA_T:
 			{
-				ihugoline = 1;
-				ehugoline = 1;
+				iline = 1;
+				eline = 1;
 				evalue = i;
 
 				if ((singleval) && !brackets) singleval = 2;
@@ -1021,7 +1021,7 @@ DoneComma:
 				{
 					GetWords();
 					i = 0;
-					halfhugoline = true;
+					halfline = true;
 					evalue = FAILED;
 				}
 
@@ -1030,8 +1030,8 @@ DoneComma:
 
 			case IN_T:
 			{
-				ihugoline = 1;
-				ehugoline = 1;
+				iline = 1;
+				eline = 1;
 				a = 0;
 				if (!strcmp(word[i-1], "not") && 
 					((i>=2) && strcmp(word[i-2], "is")))
@@ -1068,15 +1068,15 @@ DoneComma:
 				evalue = i;
 				compstart = codeptr;
 
-				/* A conditional expression hugoline may end with
+				/* A conditional expression line may end with
 				   "and" or "or", signalling the compiler
-				   to get another hugoline.
+				   to get another line.
 				*/
 				if (i==words)
 				{
 					GetWords();
 					i = 0;
-					halfhugoline = true;
+					halfline = true;
 					evalue = FAILED;
 				}
 				break;
@@ -1085,7 +1085,7 @@ DoneComma:
 			case ASTERISK_T:
 				if (verbskipaddr)
 					WriteCode(0, 1);
-				if (i==1) expr = true, ghugoline = 1;
+				if (i==1) expr = true, gline = 1;
 			case FORWARD_SLASH_T:
 				glegal = 1;
 				if (word[i-1][0]=='=')
@@ -1109,7 +1109,7 @@ DoneComma:
                                                 if (assign && i==2)
 						{
 							if (word[i+2][0]!='}')
-								Expect(i+2, "NULL", "end of hugoline after:  ++ or --");
+								Expect(i+2, "NULL", "end of line after:  ++ or --");
 						}
 						i++;
 
@@ -1128,7 +1128,7 @@ DoneComma:
 								lastt = SOME_VALUE;
 						}
 
-						/* end of hugoline */
+						/* end of line */
 						else if (((int)i<words-1) || ((int)i==words-1 && word[words][0]!='}'))
 						{
 							evalue = i;
@@ -1166,15 +1166,15 @@ DoneComma:
 			{
 				nextt = 0;
 
-				ehugoline = 1;
+				eline = 1;
 				if (lastt==t)
-					{sprintf(hugoline, "Illegal duplicate operator:  %s%s", token[t], token[t]);
-					Error(hugoline);}
+					{sprintf(line, "Illegal duplicate operator:  %s%s", token[t], token[t]);
+					Error(line);}
 
 				if (!expr && !brackets && !sbrackets)
 					Error("Expecting parentheses around expression");
 				if (t != ASTERISK_T)
-					ihugoline = 1;
+					iline = 1;
 				if (i!=1) evalue = i;
 
 				break;
@@ -1182,7 +1182,7 @@ DoneComma:
 
 			case TRUE_T:
 			case FALSE_T:
-				ihugoline = 1;
+				iline = 1;
 			case CALL_T:
 			{
 				nextt = 0;
@@ -1210,15 +1210,15 @@ DoneComma:
 			case NUMBER_T:
 				glegal = 1;
 
-				/* Allow double "number" in grammar hugoline */
-				if ((ghugoline) && lastt==t) lastt = 0;
+				/* Allow double "number" in grammar line */
+				if ((gline) && lastt==t) lastt = 0;
 
-				if ((!ghugoline) && strcmp(word[1], "print"))
+				if ((!gline) && strcmp(word[1], "print"))
 					Error("Illegal use of 'number'");
 
 			case CAPITAL_T:
 			case HEX_T:
-				if (!ghugoline)
+				if (!gline)
 				{
 					if (i<words-1 && word[i+1][0]==';')
 					{
@@ -1238,7 +1238,7 @@ DoneComma:
 				glegal = 1;
 			case DICT_T:
 				multipleval = 1;
-				if (!ghugoline)
+				if (!gline)
 				{
                                         Expect(i+1, "( )", "formal parameter(s) in parentheses");
 						parambrackets = (char)(brackets+1), paramlist++;
@@ -1260,11 +1260,11 @@ DoneComma:
 			case READVAL_T:
 			case PLAYBACK_T:
 			{
-				if (lastt==SOME_VALUE && !ghugoline) oporsep = i;
+				if (lastt==SOME_VALUE && !gline) oporsep = i;
 
-				if (!ghugoline) lastt = SOME_VALUE;
+				if (!gline) lastt = SOME_VALUE;
 				nextt = 0;
-                                if (t!=STRING_T) ihugoline = 1;
+                                if (t!=STRING_T) iline = 1;
 				evalue = 0;
 				goto NextWord;
 			}
@@ -1273,7 +1273,7 @@ DoneComma:
 			case READFILE_T:
 			{
 				evalue = true;
-				nhugoline = i;
+				nline = i;
 				eol = true;
 				WriteCode(0, 2);
 				singleval = true;
@@ -1286,7 +1286,7 @@ DoneComma:
 				eol = true;
 			case JUMP_T:
 				singleval = true;
-				nhugoline = i;
+				nline = i;
 			case TO_T:
 			{
 				evalue = i;
@@ -1345,9 +1345,9 @@ DoneComma:
 					}
 					if (!a)
 					{
-						sprintf(hugoline, "?\"%s\" has no property \"%s\"",
+						sprintf(line, "?\"%s\" has no property \"%s\"",
 							object[obj], property[prop]);
-						Error(hugoline);
+						Error(line);
 					}
 				  }
 SkipObjPropCheck:;
@@ -1366,13 +1366,13 @@ SkipObjPropCheck:;
 
 			case TEXT_T:
 			{
-				nhugoline = i;
+				nline = i;
 				if ((words > 1) && word[2][0]!='}')
 				{
 					if (strcmp(word[i+1], "to"))
 					{
-						sprintf(hugoline, "Expecting 'to' after '%s'", word[i]);
-						Error(hugoline);
+						sprintf(line, "Expecting 'to' after '%s'", word[i]);
+						Error(line);
 					}
 					eol = 1;
 					singleval = true;
@@ -1382,7 +1382,7 @@ SkipObjPropCheck:;
 
 			case WINDOW_T:
 			{
-				nhugoline = i;
+				nline = i;
 				if ((words > 1) && word[2][0]!='}')
 					evalue = i;
 				eol = 1;
@@ -1392,7 +1392,7 @@ SkipObjPropCheck:;
 			case NEWLINE_T:
 			{
 				if ((words > i) && word[i+1][0]!='}')
-					Expect(i+1, ";", "semicolon following 'newhugoline'");
+					Expect(i+1, ";", "semicolon following 'newline'");
 				break;
 			}
 
@@ -1403,7 +1403,7 @@ SkipObjPropCheck:;
 			case SOUND_T:
 			case MUSIC_T:
 				evalue = true;
-				nhugoline = i;
+				nline = i;
 				eol = true;
 				break;
 
@@ -1432,8 +1432,8 @@ SkipObjPropCheck:;
 			case ADDCONTEXT_T:
 			case VIDEO_T:
 			{
-				sprintf(hugoline, "'%s' not supported in v2.5", word[i]);
-				Error(hugoline);
+				sprintf(line, "'%s' not supported in v2.5", word[i]);
+				Error(line);
 				break;
 			}
 #endif
@@ -1441,57 +1441,57 @@ SkipObjPropCheck:;
 
 		if ((t) && t==lastt)
 		{
-			sprintf(hugoline, "Unexpected second \"%s\"", word[i]);
-			Error(hugoline);
+			sprintf(line, "Unexpected second \"%s\"", word[i]);
+			Error(line);
 		}
 
 		if ((incompprop) && !brackets && evalue)
 		{
-			sprintf(hugoline, "Illegal in complex property block heading:  %s", token[t]);
-			Error(hugoline);
+			sprintf(line, "Illegal in complex property block heading:  %s", token[t]);
+			Error(line);
 		}
 
 		lastt = t;
 
 NextWord:
-		/* If the hugoline started with a value, remember what type
+		/* If the line started with a value, remember what type
 		   of value it was.
 		*/
 		if ((i==1) && (assign || pexpr))
 			firstvalue = t;
 
-		if (nhugoline > 1)
+		if (nline > 1)
 		{
-			sprintf(hugoline, "Expecting new hugoline before:  %s", word[nhugoline]);
-			Error(hugoline);
-			nhugoline = 0;
+			sprintf(line, "Expecting new line before:  %s", word[nline]);
+			Error(line);
+			nline = 0;
 		}
-		else if (i==1 && ihugoline && !halfhugoline)
+		else if (i==1 && iline && !halfline)
 		{
-			Error("Illegal at start of hugoline");
-                        ihugoline = 0;
+			Error("Illegal at start of line");
+                        iline = 0;
 		}
 
-		if (ghugoline)
+		if (gline)
 		{
 			if (!glegal)
-				{sprintf(hugoline, "Illegal grammar token:  %s", word[i]);
-				Error(hugoline);}
+				{sprintf(line, "Illegal grammar token:  %s", word[i]);
+				Error(line);}
 		}
 		else if (glegal==2)
-			{sprintf(hugoline, "Illegal use of grammar token:  %s", word[i]);
-			Error(hugoline);}
+			{sprintf(line, "Illegal use of grammar token:  %s", word[i]);
+			Error(line);}
 
 		if (oporsep)
 		{
-			sprintf(hugoline, "Expecting operator or separator before:  %s", word[oporsep]);
-			Error(hugoline);
+			sprintf(line, "Expecting operator or separator before:  %s", word[oporsep]);
+			Error(line);
 			oporsep = 0;
 		}
-		else if (nextt > 1 && !halfhugoline)
+		else if (nextt > 1 && !halfline)
 		{
-			sprintf(hugoline, "Expecting value before:  %s", word[i]);
-			Error(hugoline);
+			sprintf(line, "Expecting value before:  %s", word[i]);
+			Error(line);
 			nextt = 0;
 		}
 
@@ -1509,7 +1509,7 @@ NextWord:
 		if (nextt) nextt++;
 	}
 
-	if (!halfhugoline)
+	if (!halfline)
 	{
 		if (assign)
 		{
@@ -1536,23 +1536,23 @@ NextWord:
 
 	if (sbrackets) Error("Unmatched brackets");
 
-	if (ehugoline) Error("Illegal at end of hugoline");
+	if (eline) Error("Illegal at end of line");
 
 	if (evalue > 0)
 	{
-		sprintf(hugoline, "Expecting %s following:  %s", (!strcmp(word[1], "jump"))?"label":"value", word[evalue]);
-		Error(hugoline);
+		sprintf(line, "Expecting %s following:  %s", (!strcmp(word[1], "jump"))?"label":"value", word[evalue]);
+		Error(line);
 	}
 
 	if (singleval==2)
 	{
-		sprintf(hugoline, "Multiple values illegal after:  %s", word[1]);
-		Error(hugoline);
+		sprintf(line, "Multiple values illegal after:  %s", word[1]);
+		Error(line);
 	}
-	else if (multipleval==1 && !ghugoline)
+	else if (multipleval==1 && !gline)
 	{
-		sprintf(hugoline, "'%s' needs more than one parameter", word[1]);
-		Error(hugoline);
+		sprintf(line, "'%s' needs more than one parameter", word[1]);
+		Error(line);
 	}
 
 	if (moveneedsto) Error("'move' requires 'to'");
@@ -1573,16 +1573,16 @@ NextWord:
 	*/
 	if (invalid_is_val)
 	{
-		sprintf(hugoline, "?\"%s\" used as attribute test", word[invalid_is_val]);
-		Error(hugoline);
+		sprintf(line, "?\"%s\" used as attribute test", word[invalid_is_val]);
+		Error(line);
 	}
 
-	/* Text-only hugoline */
-	if (thugoline)
+	/* Text-only line */
+	if (tline)
 	{
 		if (word[words][0]=='}') words--;
 
-		/* Nothing else is allowed on the hugoline besides "<text>" and
+		/* Nothing else is allowed on the line besides "<text>" and
 		   possibly a trailing semicolon.
 		*/
 		if ((words==2 && word[2][0]!=';') || words > 2)
@@ -1680,7 +1680,7 @@ void CodeSelect(void)
 	*/	   
 	else
 	{
-		strcpy(hugoline, "");
+		strcpy(line, "");
 		for (i=2; i<=words; i++)
 		{
 			strcat(selectvar, word[i]);
@@ -1871,7 +1871,7 @@ int IDWord(int a)
 	if (word[a][0]=='\"')
 	{
 		/* Text string */
-		if (a==1 && !halfhugoline)		/* first word in hugoline */
+		if (a==1 && !halfline)		/* first word in line */
 			{StripQuotes(word[a]);
 			token_val = WriteText(word[a]);
 			return TEXTDATA_T;}
@@ -2000,9 +2000,9 @@ int IDWord(int a)
 	{
 		if ((word[a][2]!='\'' && word[a][1]!='\\') || (word[a][1]=='\\' && word[a][3]!='\''))
 		{
-			strcpy(hugoline, "Unknown ASCII value:  ");
-			strncpy(hugoline+strlen(hugoline), word[a], MAXBUFFER-64);
-			Error(hugoline);
+			strcpy(line, "Unknown ASCII value:  ");
+			strncpy(line+strlen(line), word[a], MAXBUFFER-64);
+			Error(line);
 		}
 		if (word[a][1]=='\\') token_val = toascii(word[a][2]);
 		else token_val = toascii(word[a][1]);
@@ -2011,9 +2011,9 @@ int IDWord(int a)
 
 	if (!silent_IDWord)
 	{
-		strcpy(hugoline, "Syntax error:  ");
-		strncpy(hugoline+strlen(hugoline), word[a], MAXBUFFER-64);
-		Error(hugoline);
+		strcpy(line, "Syntax error:  ");
+		strncpy(line+strlen(line), word[a], MAXBUFFER-64);
+		Error(line);
 	}
 
 	return 0;

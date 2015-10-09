@@ -30,17 +30,17 @@ void DrawBranch(int obj);
 void PrintErrorLocation(void);
 void PrintLimit(char *a, unsigned int n, int nl);
 
-int argc;                       /* parameters passed from command hugoline */
+int argc;                       /* parameters passed from command line */
 char **argv, **envp;
 
 char errfile[MAXPATH];          /* for locating errors in Pass2    */
-unsigned int errhugoline;
-int words;			/* number of words in input hugoline   */
+unsigned int errline;
+int words;			/* number of words in input line   */
 char *word[MAXWORDS+1];         /* the words themselves            */
-char hugoline[MAXBUFFER+1];            /* output hugoline                     */
+char line[MAXBUFFER+1];            /* output line                     */
 char full_buffer;		/* true if word[] isn't empty	   */
 
-/* Command hugoline switch flags: */
+/* Command line switch flags: */
 char    listing = 0,                    /* output to .LST file          */
 	objecttree = 0,                 /* print object tree when done  */
 	fullobj = 0,                    /* output full object summaries */
@@ -61,7 +61,7 @@ char    listing = 0,                    /* output to .LST file          */
 	char compile_v25 = 1;
 #endif
 
-int percent = 0, totalhugolines = 0, thugolines = 0;  /* percentage completion */
+int percent = 0, totallines = 0, tlines = 0;  /* percentage completion */
 
 int er = 0;                     /* error counter */
 int warn = 0;                   /* warning counter */
@@ -144,8 +144,8 @@ unsigned int AddDictionary(char *a)
 	/* No match, or no entries with letter */
 
 	if (dictcount >= MAXDICT)
-		{sprintf(hugoline, "Maximum number of %d dictionary entries exceeded", MAXDICT);
-		Error(hugoline);
+		{sprintf(line, "Maximum number of %d dictionary entries exceeded", MAXDICT);
+		Error(line);
 		return 0;}
 
 	if ((lexentry[dictcount] = malloc((strlen(a)+1)*sizeof(char)))==NULL)
@@ -169,7 +169,7 @@ unsigned int AddDictionary(char *a)
 
 	Registers the directory <path> as a searchable location for
 	files of type HUGO_<directory type>.  Directories are passed
-	without the leading '@' in the command hugoline or source.
+	without the leading '@' in the command line or source.
 */
 
 void AddDirectory(char *d)
@@ -193,8 +193,8 @@ void AddDirectory(char *d)
 
 	if (directoryctr==MAXDIRECTORIES)
 	{
-		sprintf(hugoline, "Maximum of %d directory settings exceeded", MAXDIRECTORIES);
-		Error(hugoline);
+		sprintf(line, "Maximum of %d directory settings exceeded", MAXDIRECTORIES);
+		Error(line);
 		return;
 	}
 
@@ -262,14 +262,14 @@ void DrawBranch(int obj)
 
 	if (nest)
 	{
-		strcpy(hugoline, "");
+		strcpy(line, "");
 		for (i=1; i<nest; i++)
-			strcat(hugoline, ". . ");
-		strcat(hugoline, "\\;");
-		Printout(hugoline);
+			strcat(line, ". . ");
+		strcat(line, "\\;");
+		Printout(line);
 	}
-	sprintf(hugoline, "[%d] %s", obj, object[obj]);
-	Printout(hugoline);
+	sprintf(line, "[%d] %s", obj, object[obj]);
+	Printout(line);
 
 	for (i=0; i<objects; i++)
 	{
@@ -297,7 +297,7 @@ void DrawTree(void)
 
 /* ERROR
 
-	For non-fatal errors.  Prints the offending hugoline of (reconstructed)
+	For non-fatal errors.  Prints the offending line of (reconstructed)
 	code followed by the error message.  Warnings begin with a '?'.
 */
 
@@ -308,14 +308,14 @@ void Error(char *a)
 
 	if (percent && passnumber==1)
 	{
-		printf("\rCompiling %5d hugolines of %s", totalhugolines, PRINTED_FILENAME(sourcefilename));
+		printf("\rCompiling %5d lines of %s", totallines, PRINTED_FILENAME(sourcefilename));
 		if (listing)
-			if (fprintf(listfile, "Compiling %5d hugolines of %s\n", totalhugolines, PRINTED_FILENAME(sourcefilename)) < 0)
+			if (fprintf(listfile, "Compiling %5d lines of %s\n", totallines, PRINTED_FILENAME(sourcefilename)) < 0)
 				FatalError(WRITE_E, listfilename);
 
 #ifdef STDPRN_SUPPORTED
 		if (printer)
-			if (fprintf(stdprn, "Compiling %5d hugolines of %s\n\r", totalhugolines, PRINTED_FILENAME(sourcefilename)) < 0)
+			if (fprintf(stdprn, "Compiling %5d lines of %s\n\r", totallines, PRINTED_FILENAME(sourcefilename)) < 0)
 				FatalError(WRITE_E, "printer");
 #endif
 	}
@@ -353,7 +353,7 @@ SkipPrintingWords:
 	}
 	Printout(errbuf);
 
-	/* Don't continue with the hugoline-count/percentage-completion after
+	/* Don't continue with the line-count/percentage-completion after
 	   an error--it gets messy.
 	*/
 	percent = false;
@@ -379,13 +379,13 @@ void FatalError(int n, char *a)
 
 	if (percent && passnumber==1)
 	{
-		printf("\rCompiling %5d hugolines of %s", totalhugolines, PRINTED_FILENAME(sourcefilename));
+		printf("\rCompiling %5d lines of %s", totallines, PRINTED_FILENAME(sourcefilename));
 		if (listing==true)
-			fprintf(listfile, "Compiling %5d hugolines of %s\n", totalhugolines, PRINTED_FILENAME(sourcefilename));
+			fprintf(listfile, "Compiling %5d lines of %s\n", totallines, PRINTED_FILENAME(sourcefilename));
 
 #if defined (STDPRN_SUPPORTED)
 		if (printer)
-			fprintf(stdprn, "Compiling %5d hugolines of %s\n\r", totalhugolines, PRINTED_FILENAME(sourcefilename));
+			fprintf(stdprn, "Compiling %5d lines of %s\n\r", totallines, PRINTED_FILENAME(sourcefilename));
 #endif
 	}
 
@@ -415,42 +415,42 @@ void FatalError(int n, char *a)
 			break;}
 
 		case OPEN_E:
-			{sprintf(hugoline, "Unable to open %s", PRINTED_FILENAME(a));
-			Printout(hugoline);
+			{sprintf(line, "Unable to open %s", PRINTED_FILENAME(a));
+			Printout(line);
 			break;}
 
 		case READ_E:
-			{sprintf(hugoline, "Cannot read from %s", PRINTED_FILENAME(a));
-			Printout(hugoline);
+			{sprintf(line, "Cannot read from %s", PRINTED_FILENAME(a));
+			Printout(line);
 			break;}
 
 		case WRITE_E:
-			{sprintf(hugoline, "Cannot write to %s", PRINTED_FILENAME(a));
-			Printout(hugoline);
+			{sprintf(line, "Cannot write to %s", PRINTED_FILENAME(a));
+			Printout(line);
 			break;}
 
 		case OVERFLOW_E:
-			{sprintf(hugoline, "Line overflow in %s", PRINTED_FILENAME(a));
-			Printout(hugoline);
+			{sprintf(line, "Line overflow in %s", PRINTED_FILENAME(a));
+			Printout(line);
 			break;}
 
 		case EOF_COMMENT_E:
-			{sprintf(hugoline, "Unexpected end-of-file in comment in %s", PRINTED_FILENAME(a));
-			Printout(hugoline);
+			{sprintf(line, "Unexpected end-of-file in comment in %s", PRINTED_FILENAME(a));
+			Printout(line);
 			break;}
 
 		case EOF_TEXT_E:
-			{sprintf(hugoline, "Unexpected end-of-file in text in %s", PRINTED_FILENAME(a));
-			Printout(hugoline);
+			{sprintf(line, "Unexpected end-of-file in text in %s", PRINTED_FILENAME(a));
+			Printout(line);
 			break;}
 			
 		case EOF_ENDIF_E:
-			{sprintf(hugoline, "Unexpected end-of-file before #endif in %s", PRINTED_FILENAME(a));
-			Printout(hugoline);
+			{sprintf(line, "Unexpected end-of-file before #endif in %s", PRINTED_FILENAME(a));
+			Printout(line);
 			break;}
 
 		case COMP_LINK_LIMIT_E:
-			{Printout(hugoline);
+			{Printout(line);
 			break;}
 	}
 	CleanUpFiles();
@@ -471,10 +471,10 @@ int Expect(int a, char *t, char *d)
 
 	if (word[a][0]!=t[0])
 	{
-		sprintf(hugoline, "Expecting %s", d);
+		sprintf(line, "Expecting %s", d);
 		if (t[0]!='\0')
-			sprintf(hugoline+strlen(hugoline), ":  '%s'", t);
-		Error(hugoline);
+			sprintf(line+strlen(line), ":  '%s'", t);
+		Error(line);
 		return false;
 	}
 	return true;
@@ -571,8 +571,8 @@ void ParseCommand(int argc, char *argv[])
 
 	if (argc==1)
 	{
-		sprintf(hugoline, "\nSYNTAX:   %s [options] sourcefile [objectfile[.HEX]]", argv[0]); //, PROGRAM_NAME);
-		Printout(hugoline);
+		sprintf(line, "\nSYNTAX:   %s [options] sourcefile [objectfile[.HEX]]", argv[0]); //, PROGRAM_NAME);
+		Printout(line);
 		Printout("OPTIONS:  -<switches>  $<limit setting>  #<compiler flag>  @<directory>");
 		Printout("\nSWITCHES:");
 		Printout("  -a  Abort on first error                -d  build .HDX Debuggable executable");
@@ -715,36 +715,36 @@ void PrintErrorLocation(void)
 {
 	char errbuf[256];
 
-	/* errhugoline is recorded in the allfile for reading during
+	/* errline is recorded in the allfile for reading during
 	   Pass2...
 	*/
-	if (passnumber==2 && errhugoline)
+	if (passnumber==2 && errline)
 	{
 		if (expandederr)
 		{
-			sprintf(errbuf, "%s:  Line %u, in %s", PRINTED_FILENAME(errfile), errhugoline, object_id);
+			sprintf(errbuf, "%s:  Line %u, in %s", PRINTED_FILENAME(errfile), errline, object_id);
 			Printout(errbuf);
 		}
 		else
 		{
-			sprintf(errbuf, "%s:%u:  %s:  \\;", errfile, errhugoline, object_id);
+			sprintf(errbuf, "%s:%u:  %s:  \\;", errfile, errline, object_id);
 			Printout(errbuf);
 		}
 	}
 
-	/* ...before which, we can use totalhugolines and the name of
+	/* ...before which, we can use totallines and the name of
 	   the current source file.
 	*/
-	else if (passnumber==1 && totalhugolines)
+	else if (passnumber==1 && totallines)
 	{
 		if (expandederr)
 		{
-			sprintf(errbuf, "%s:  Line %u", PRINTED_FILENAME(sourcefilename), totalhugolines);
+			sprintf(errbuf, "%s:  Line %u", PRINTED_FILENAME(sourcefilename), totallines);
 			Printout(errbuf);
 		}
 		else
 		{
-			sprintf(errbuf, "%s:%u:  \\;", sourcefilename, totalhugolines);
+			sprintf(errbuf, "%s:%u:  \\;", sourcefilename, totallines);
 			Printout(errbuf);
 		}
 	}
@@ -800,16 +800,16 @@ char *PrintHex(long a, char b)
 
 void PrintLimit(char *a, unsigned int n, int nl)
 {
-	if (n) sprintf(hugoline, "\t%-15s %5u\\;", a, n);
-	else sprintf(hugoline, "\t%-15s   (0)\\;", a);
-	Printout(hugoline);
+	if (n) sprintf(line, "\t%-15s %5u\\;", a, n);
+	else sprintf(line, "\t%-15s   (0)\\;", a);
+	Printout(line);
 	if (!nl) Printout("");
 }
 
 
 /* PRINTLINE
 
-	Prints a hugoline of <n> repetitions of character <a>.
+	Prints a line of <n> repetitions of character <a>.
 */
 
 void PrintLine(int n, char a)
@@ -896,13 +896,13 @@ void PrintStatistics(void)
 		if (attrctr) Printout("\n  ATTRIBUTE NUMBERS:");
 
 		for (i=0; i<attrctr; i++)
-			{sprintf(hugoline, "     $%2s (%2d):  %s", PrintHex((long)i, 1), i, attribute[i]);
-			Printout(hugoline);}
+			{sprintf(line, "     $%2s (%2d):  %s", PrintHex((long)i, 1), i, attribute[i]);
+			Printout(line);}
 		for (i=0; i<aliasctr; i++)
 		{
 			if (aliasof[i] < MAXATTRIBUTES)
-				{sprintf(hugoline, "\t\t%s ALIAS OF %s", alias[i], attribute[aliasof[i]]);
-				Printout(hugoline);}
+				{sprintf(line, "\t\t%s ALIAS OF %s", alias[i], attribute[aliasof[i]]);
+				Printout(line);}
 		}
 
 		Printout("\n  PROPERTY NUMBERS:");
@@ -913,27 +913,27 @@ void PrintStatistics(void)
 			if (propadd[i]&COMPLEX_FLAG) strcat(atype, "$COMPLEX ");
 
 			if (propdef[i])
-				sprintf(hugoline, "    $%2s (%3d):  %s %s (DEFAULT VALUE:  %d)", PrintHex((long)i, 1), i, property[i], atype, (short)propdef[i]);
+				sprintf(line, "    $%2s (%3d):  %s %s (DEFAULT VALUE:  %d)", PrintHex((long)i, 1), i, property[i], atype, (short)propdef[i]);
 			else
-				sprintf(hugoline, "    $%2s (%3d):  %s %s", PrintHex((long)i, 1), i, property[i], atype);
-			Printout(hugoline);
+				sprintf(line, "    $%2s (%3d):  %s %s", PrintHex((long)i, 1), i, property[i], atype);
+			Printout(line);
 		}
 		for (i=0; i<aliasctr; i++)
 		{
 			if (aliasof[i]>=MAXATTRIBUTES)
-				{sprintf(hugoline, "\t\t%s ALIAS OF %s", alias[i], property[aliasof[i]-MAXATTRIBUTES]);
-				Printout(hugoline);}
+				{sprintf(line, "\t\t%s ALIAS OF %s", alias[i], property[aliasof[i]-MAXATTRIBUTES]);
+				Printout(line);}
 		}
 
 		Printout("\n  GLOBAL VARIABLE NUMBERS:");
 		for (i=0; i<globalctr; i++)
-			{sprintf(hugoline, "    $%2s (%3d):  %s", PrintHex((long)i, 1), i, global[i]);
-			Printout(hugoline);}
+			{sprintf(line, "    $%2s (%3d):  %s", PrintHex((long)i, 1), i, global[i]);
+			Printout(line);}
 
 		if (arrayctr) Printout("\n  ARRAY ADDRESSES:");
 		for (i=0; i<arrayctr; i++)
-			{sprintf(hugoline, "    $%4s:  %s", PrintHex((long)arrayaddr[i], 2), array[i]);
-			Printout(hugoline);}
+			{sprintf(line, "    $%4s:  %s", PrintHex((long)arrayaddr[i], 2), array[i]);
+			Printout(line);}
 
 		Printout("\n  PROPERTY ROUTINE ADDRESSES:");
 		obj = 0;
@@ -961,9 +961,9 @@ void PrintStatistics(void)
 					n = propdata[a/PROPBLOCKSIZE][a%PROPBLOCKSIZE];
 					a++;
 					if (dflag==1)
-						{sprintf(hugoline, "    $%6s:  %s.%s",
+						{sprintf(line, "    $%6s:  %s.%s",
 							PrintHex((long)n*address_scale, 3), object[obj], property[p]);
-						Printout(hugoline);
+						Printout(line);
 						dflag = 0;}
 				}
 			}
@@ -972,17 +972,17 @@ void PrintStatistics(void)
 
 		Printout("\n  ROUTINE ADDRESSES:");
 		for (i=0; i<routines; i++)
-			{sprintf(hugoline, "    $%6s:  %s", PrintHex((long)raddr[i]*address_scale, 3), routine[i]);
-			Printout(hugoline);}
+			{sprintf(line, "    $%6s:  %s", PrintHex((long)raddr[i]*address_scale, 3), routine[i]);
+			Printout(line);}
 
 		if (events) Printout("\n  EVENT ADDRESSES:");
 		for (i=0; i<events; i++)
 		{
-			sprintf(hugoline, "    $%6s:  \\;", PrintHex((long)eventaddr[i]*address_scale, 3));
-			Printout(hugoline);
+			sprintf(line, "    $%6s:  \\;", PrintHex((long)eventaddr[i]*address_scale, 3));
+			Printout(line);
 			if (eventin[i])
-				{sprintf(hugoline, "Event in:  %s", object[eventin[i]]);
-				Printout(hugoline);}
+				{sprintf(line, "Event in:  %s", object[eventin[i]]);
+				Printout(line);}
 			else Printout("Global event");
 		}
 	}
@@ -992,54 +992,54 @@ void PrintStatistics(void)
 	{
 		Printout("");
 		PrintLine(79, '=');
-		sprintf(hugoline, "HUGO COMPILER v%d.%d%s STATISTICS FOR:  %s",
+		sprintf(line, "HUGO COMPILER v%d.%d%s STATISTICS FOR:  %s",
 			HCVERSION, HCREVISION, HCINTERIM, PRINTED_FILENAME(sourcefilename));
-		Printout(hugoline);
-		strftime(hugoline, 32, "%m/%d/%y %H:%M:%S", localtime(&tick2));
-		Printout(hugoline);
+		Printout(line);
+		strftime(line, 32, "%m/%d/%y %H:%M:%S", localtime(&tick2));
+		Printout(line);
 		PrintLine(79, '=');
 
-		sprintf(hugoline, "Compiled %d hugolines in %d file(s)", thugolines, totalfiles);
-		Printout(hugoline);
-		sprintf(hugoline, "\nObjects:    %5d (maximum %5d)      Routines: %5d (maximum %5d)", objectctr, MAXOBJECTS, routinectr, MAXROUTINES);
-		Printout(hugoline);
-		sprintf(hugoline, "Attributes: %5d (maximum %5d)      Events:   %5d (maximum %5d)", attrctr, MAXATTRIBUTES, eventctr, MAXEVENTS);
-		Printout(hugoline);
-		sprintf(hugoline, "Properties: %5d (maximum %5d)      Labels:   %5d (maximum %5d)", propctr, MAXPROPERTIES, labelctr, MAXLABELS);
-		Printout(hugoline);
-		sprintf(hugoline, "Aliases:    %5d (maximum %5d)      Globals:  %5d (maximum %5d)", aliasctr, MAXALIASES, globalctr, MAXGLOBALS);
-		Printout(hugoline);
-		sprintf(hugoline, "Constants:  %5d (maximum %5d)      Arrays:   %5d (maximum %5d)", constctr, MAXCONSTANTS, arrayctr, MAXARRAYS);
-		Printout(hugoline);
+		sprintf(line, "Compiled %d lines in %d file(s)", tlines, totalfiles);
+		Printout(line);
+		sprintf(line, "\nObjects:    %5d (maximum %5d)      Routines: %5d (maximum %5d)", objectctr, MAXOBJECTS, routinectr, MAXROUTINES);
+		Printout(line);
+		sprintf(line, "Attributes: %5d (maximum %5d)      Events:   %5d (maximum %5d)", attrctr, MAXATTRIBUTES, eventctr, MAXEVENTS);
+		Printout(line);
+		sprintf(line, "Properties: %5d (maximum %5d)      Labels:   %5d (maximum %5d)", propctr, MAXPROPERTIES, labelctr, MAXLABELS);
+		Printout(line);
+		sprintf(line, "Aliases:    %5d (maximum %5d)      Globals:  %5d (maximum %5d)", aliasctr, MAXALIASES, globalctr, MAXGLOBALS);
+		Printout(line);
+		sprintf(line, "Constants:  %5d (maximum %5d)      Arrays:   %5d (maximum %5d)", constctr, MAXCONSTANTS, arrayctr, MAXARRAYS);
+		Printout(line);
 
-		sprintf(hugoline, "\nWords in dictionary: %5d    Special words: %5d    Verbs: %5d", dictcount, syncount, verbs);
-		Printout(hugoline);
+		sprintf(line, "\nWords in dictionary: %5d    Special words: %5d    Verbs: %5d", dictcount, syncount, verbs);
+		Printout(line);
 
-		sprintf(hugoline, "\nObject file:  %s (%ld bytes)", PRINTED_FILENAME(objectfilename), codeptr);
-		Printout(hugoline);
+		sprintf(line, "\nObject file:  %s (%ld bytes)", PRINTED_FILENAME(objectfilename), codeptr);
+		Printout(line);
 
 		if (hlb || builddebug)
 		{
-			strcpy(hugoline, "(");
-			if (hlb) strcat(hugoline, "precompiled ");
-			if (builddebug) strcat(hugoline, "debuggable ");
-			strcat(hugoline, "format)");
-			Printout(hugoline);
+			strcpy(line, "(");
+			if (hlb) strcat(line, "precompiled ");
+			if (builddebug) strcat(line, "debuggable ");
+			strcat(line, "format)");
+			Printout(line);
 		}
 
 		if (listing)
-			{sprintf(hugoline, "List file:    %s", PRINTED_FILENAME(listfilename));
-			Printout(hugoline);}
+			{sprintf(line, "List file:    %s", PRINTED_FILENAME(listfilename));
+			Printout(line);}
 
-		sprintf(hugoline, "\nElapsed compile time:  %u seconds", (unsigned int)tick);
-		Printout(hugoline);
+		sprintf(line, "\nElapsed compile time:  %u seconds", (unsigned int)tick);
+		Printout(line);
 
 		if (er || warn)
 		{
-			strcpy(hugoline, "\n");
-			if (er) sprintf(hugoline+1, "ERRORS:  %d    ", er);
-			if (warn) sprintf(hugoline+strlen(hugoline), "WARNINGS:  %d", warn);
-			Printout(hugoline);
+			strcpy(line, "\n");
+			if (er) sprintf(line+1, "ERRORS:  %d    ", er);
+			if (warn) sprintf(line+strlen(line), "WARNINGS:  %d", warn);
+			Printout(line);
 		}
 
 		PrintLine(79, '=');
@@ -1072,8 +1072,8 @@ void PrinttoAll(void)
 		}
 		if (fputs(":!\n", allfile)==EOF) FatalError(WRITE_E, allfilename);
 
-		/* then print hugoline number for later error trapping */
-		WriteWord(totalhugolines, allfile);
+		/* then print line number for later error trapping */
+		WriteWord(totallines, allfile);
 	}
 }
 
@@ -1452,8 +1452,8 @@ AddAnotherChar:
 			if ((unsigned char)b < 32)
 #endif
 			{
-				sprintf(hugoline, "?Non-ASCII character value:  %d", (unsigned char)b);
-				Error(hugoline);
+				sprintf(line, "?Non-ASCII character value:  %d", (unsigned char)b);
+				Error(line);
 			}
 			buffer[bloc] = b;
 			buffer[++bloc] = '\0';
@@ -1505,10 +1505,10 @@ DoneLine:
 	}
 	word[words+1] = "";
 /*
-strcpy(hugoline, "");
+strcpy(line, "");
 for (i=1; i<=words; i++)
-	sprintf(hugoline+strlen(hugoline), "\"%s\" ", word[i]);
-Printout(hugoline);
+	sprintf(line+strlen(line), "\"%s\" ", word[i]);
+Printout(line);
 */
 }
 
@@ -1539,8 +1539,8 @@ void SetLimit(char *a)
 			j = atoi(a+i+1);
 			if ((j==0) && (a[i+1]!='0'))
 			{
-				sprintf(hugoline, "Invalid limit setting:  $%s=%s", a, a+i+1);
-				Error(hugoline);
+				sprintf(line, "Invalid limit setting:  $%s=%s", a, a+i+1);
+				Error(line);
 				return;
 			}
 
@@ -1584,23 +1584,23 @@ void SetLimit(char *a)
 
 			if (flag==0)
 			{
-				sprintf(hugoline, "No such limit:  %s", a);
-				Error(hugoline);
+				sprintf(line, "No such limit:  %s", a);
+				Error(line);
 			}
 			if (flag==2)
 			{
-				sprintf(hugoline, "Limit not modifiable:  %s", a);
-				Error(hugoline);
+				sprintf(line, "Limit not modifiable:  %s", a);
+				Error(line);
 			}
 			if (flag==3)
 			{
-				sprintf(hugoline, "Limit exceeds maximum of %u:  $%s=%s", limit, a, a+i+1);
-				Error(hugoline);
+				sprintf(line, "Limit exceeds maximum of %u:  $%s=%s", limit, a, a+i+1);
+				Error(line);
 			}
 			if (flag==4)
 			{
-				sprintf(hugoline, "Limit must be at least %u:  $%s=%s", limit, a, a+i+1);
-				Error(hugoline);
+				sprintf(line, "Limit must be at least %u:  $%s=%s", limit, a, a+i+1);
+				Error(line);
 			}
 
 			return;
@@ -1866,8 +1866,8 @@ void SetSwitches(char *a)
 
 		else
 		{
-			sprintf(hugoline, "Invalid switch:  %c", b);
-			Error(hugoline);
+			sprintf(line, "Invalid switch:  %c", b);
+			Error(line);
 		}
 	}
 
@@ -1883,7 +1883,7 @@ void StripQuotes(char *a)
 		{a[strlen(a)-1] = '\0';
 		strcpy(a, a+1);}
 	else
-		{sprintf(hugoline, "Missing quotes:  %s", a);
-		Error(hugoline);}
+		{sprintf(line, "Missing quotes:  %s", a);
+		Error(line);}
 }
 

@@ -66,8 +66,8 @@ void LinkerPass1(void)
 	if (ReadCode(1)!=HCVERSION*10+HCREVISION || ReadCode(1)!='$' || ReadCode(1)!='$')
 		{fclose(linkfile);
 		aborterror = true;
-		sprintf(hugoline, "Invalid precompiled header version:  %s", linkfilename);
-		Error(hugoline);
+		sprintf(line, "Invalid precompiled header version:  %s", linkfilename);
+		Error(line);
 		return;}
 
 	pcount = (unsigned int)ReadCode(2);           /* # of obj. properties */
@@ -98,8 +98,8 @@ void LinkerPass1(void)
 	{
 		len = (unsigned int)ReadCode(1)+1;
 		if (len>MAX_SYMBOL_LENGTH) FatalError(READ_E, linkfilename);
-		if (!fgets(hugoline, len, linkfile)) FatalError(READ_E, linkfilename);
-		object[i] = MakeString(hugoline);
+		if (!fgets(line, len, linkfile)) FatalError(READ_E, linkfilename);
+		object[i] = MakeString(line);
 		object_hash[i] = FindHash(object[i]);
 		oprop[i] = (unsigned int)ReadCode(2);
 		for (j=0; j<MAXATTRIBUTES/32; j++)
@@ -124,8 +124,8 @@ void LinkerPass1(void)
 		{
 			len = (unsigned int)ReadCode(1)+1;
 			if (len>MAX_SYMBOL_LENGTH) FatalError(READ_E, linkfilename);
-			if (!fgets(hugoline, len, linkfile)) FatalError(READ_E, linkfilename);
-	                property[i] = MakeString(hugoline);
+			if (!fgets(line, len, linkfile)) FatalError(READ_E, linkfilename);
+	                property[i] = MakeString(line);
 		}
 		property_hash[i] = FindHash(property[i]);
 		propdef[i] = (unsigned int)ReadCode(2);
@@ -157,8 +157,8 @@ void LinkerPass1(void)
 	{
 		len = (unsigned int)ReadCode(1)+1;
 		if (len>MAX_SYMBOL_LENGTH) FatalError(READ_E, linkfilename);
-		if (!fgets(hugoline, len, linkfile)) FatalError(READ_E, linkfilename);
-		attribute[i] = MakeString(hugoline);
+		if (!fgets(line, len, linkfile)) FatalError(READ_E, linkfilename);
+		attribute[i] = MakeString(line);
 		attribute_hash[i] = FindHash(attribute[i]);
 	}
 
@@ -168,8 +168,8 @@ void LinkerPass1(void)
 	{
 		len = (unsigned int)ReadCode(1)+1;
 		if (len>MAX_SYMBOL_LENGTH) FatalError(READ_E, linkfilename);
-		if (!fgets(hugoline, len, linkfile)) FatalError(READ_E, linkfilename);
-		alias[i] = MakeString(hugoline);
+		if (!fgets(line, len, linkfile)) FatalError(READ_E, linkfilename);
+		alias[i] = MakeString(line);
 		alias_hash[i] = FindHash(alias[i]);
 		aliasof[i] = (unsigned int)ReadCode(2);
 	}
@@ -180,8 +180,8 @@ void LinkerPass1(void)
 	{
 		len = (unsigned int)ReadCode(1)+1;
 		if (len>MAX_SYMBOL_LENGTH) FatalError(READ_E, linkfilename);
-		if (!fgets(hugoline, len, linkfile)) FatalError(READ_E, linkfilename);
-		if (i>=ENGINE_GLOBALS) global[i] = MakeString(hugoline);
+		if (!fgets(line, len, linkfile)) FatalError(READ_E, linkfilename);
+		if (i>=ENGINE_GLOBALS) global[i] = MakeString(line);
 		global_hash[i] = FindHash(global[i]);
 		globaldef[i] = (unsigned int)ReadCode(2);
 	}
@@ -192,8 +192,8 @@ void LinkerPass1(void)
 	{
 		len = (unsigned int)ReadCode(1)+1;
 		if (len>MAX_SYMBOL_LENGTH) FatalError(READ_E, linkfilename);
-		if (!fgets(hugoline, len, linkfile)) FatalError(READ_E, linkfilename);
-		constant[i] = MakeString(hugoline);
+		if (!fgets(line, len, linkfile)) FatalError(READ_E, linkfilename);
+		constant[i] = MakeString(line);
 		constant_hash[i] = FindHash(constant[i]);
 		constantval[i] = (unsigned int)ReadCode(2);
 	}
@@ -204,8 +204,8 @@ void LinkerPass1(void)
 	{
 		len = (unsigned int)ReadCode(1)+1;
 		if (len>MAX_SYMBOL_LENGTH) FatalError(READ_E, linkfilename);
-		if (!fgets(hugoline, len, linkfile)) FatalError(READ_E, linkfilename);
-		routine[i] = MakeString(hugoline);
+		if (!fgets(line, len, linkfile)) FatalError(READ_E, linkfilename);
+		routine[i] = MakeString(line);
 		routine_hash[i] = FindHash(routine[i]);
 		raddr[i] = (unsigned int)ReadCode(2);
 		rreplace[i] = 0;
@@ -221,8 +221,8 @@ void LinkerPass1(void)
 	{
 		len = (unsigned int)ReadCode(1)+1;
 		if (len>MAX_SYMBOL_LENGTH) FatalError(READ_E, linkfilename);
-		if (!fgets(hugoline, len, linkfile)) FatalError(READ_E, linkfilename);
-		array[i] = MakeString(hugoline);
+		if (!fgets(line, len, linkfile)) FatalError(READ_E, linkfilename);
+		array[i] = MakeString(line);
 		array_hash[i] = FindHash(array[i]);
 		arrayaddr[i] = (unsigned int)ReadCode(2);
 		arraylen[i] = (unsigned int)ReadCode(2);
@@ -255,9 +255,9 @@ void LinkerPass1(void)
 	{
 		len = (unsigned int)ReadCode(1);
 		for (j=1; j<=(unsigned int)len; j++)
-			hugoline[j-1] = (char)(ReadCode(1)-CHAR_TRANSLATION);
-		hugoline[j-1] = '\0';
-		AddDictionary(hugoline);
+			line[j-1] = (char)(ReadCode(1)-CHAR_TRANSLATION);
+		line[j-1] = '\0';
+		AddDictionary(line);
 	}
 
 	data = (unsigned int)ReadCode(2);
@@ -295,7 +295,7 @@ void CheckLinkLimit(int a, int b, char *n)
 {
 	if (a > b)
 	{
-		sprintf(hugoline, "Compiler limit of %d %s exceeded in:  %s", b, n, linkfilename);
+		sprintf(line, "Compiler limit of %d %s exceeded in:  %s", b, n, linkfilename);
 		FatalError(COMP_LINK_LIMIT_E, "");
 	}
 }

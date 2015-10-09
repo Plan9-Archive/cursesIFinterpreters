@@ -228,7 +228,7 @@ void hc_reset_everything(void)
 	compile_v25 = 1;
 	#endif
 	
-	percent = 0, totalhugolines = 0, thugolines = 0;
+	percent = 0, totallines = 0, tlines = 0;
 	er = 0;
 	warn = 0;
 	

@@ -42,7 +42,7 @@
 #
 # The following defines set configuration options:
 #	DO_COLOR	turns on color handling (requires ncurses)
-#CFG_OPTIONS=-DDO_COLOR
+CFG_OPTIONS=-DDO_COLOR
 
 # Define your optimization flags.  Most compilers understand -O and -O2,
 # Debugging
@@ -50,15 +50,19 @@
 # Standard optimizations
 # Pentium with gcc 2.7.0 or better
 #CFLAGS=-O2 -Wall -fomit-frame-pointer -malign-functions=2 -malign-loops=2 -malign-jumps=2
-#CFLAGS=-O2 -Wall
-CFLAGS=
+CFLAGS=-O2 -Wall
 # If you are using the ncurses package, define NCURSES for the compiler
-CFLAGS:=$(CFLAGS) -DCURSES
+CFLAGS:=$(CFLAGS) -DNCURSES -DGCC_UNIX -DUSE_TEMPFILES
+ifeq ($(MAKECMDGOALS), he)
+CFLAGS:=$(CFLAGS) -DNO_LATIN1_CHARSET
+endif
+ifeq ($(MAKECMDGOALS), hd)
+CFLAGS:=$(CFLAGS) -DDEBUGGER -DFRONT_END -DNO_LATIN1_CHARSET
+endif
 
 # If you need a special include path to get the right curses header, specify
 # it.
-#CC=gcc -I/usr/local/include -Isource $(CFG_OPTIONS) $(CFLAGS)
-CC=pcc -Isource 
+CC=gcc -I/usr/local/include -Isource $(CFG_OPTIONS) $(CFLAGS)
 
 # If using ncurses you need -lncurses, otherwise use -lcurses.  You may also
 # need -ltermcap or -ltermlib.  If you need to specify a particular path to
@@ -67,7 +71,7 @@ CC=pcc -Isource
 #HE_LIBS=-lcurses -ltermcap
 #HE_LIBS=-lcurses -ltermlib
 #HE_LIBS=-lcurses 
-HE_LIBS=-lcurses 
+HE_LIBS=-lncurses 
 
 # Shouldn't need to change anything below here.
 HC_H=$(SOURCE)/hcheader.h $(SOURCE)/htokens.h

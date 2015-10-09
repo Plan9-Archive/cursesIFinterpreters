@@ -148,24 +148,24 @@ void DisplayMenu(int m, int selection)
 	saved_menu = debug_windowsave(menu_data[m].position-2, 2, 
 		menu_data[m].position+len+3, count+4);
 
-	/* Print top hugoline of menu */
+	/* Print top line of menu */
 	debug_settextpos(menu_data[m].position-2, 2);
-	debug_hugoline[0] = TOP_LEFT;
-	memset(debug_hugoline+1, HORIZONTAL_LINE, len+2);
-	sprintf(debug_hugoline+len+3, "%c", TOP_RIGHT);
-	debug_print(debug_hugoline);
+	debug_line[0] = TOP_LEFT;
+	memset(debug_line+1, HORIZONTAL_LINE, len+2);
+	sprintf(debug_line+len+3, "%c", TOP_RIGHT);
+	debug_print(debug_line);
 
-	/* Print each hugoline of menu */
+	/* Print each line of menu */
 	for (i=1; i<=count; i++)
 	{
 		debug_settextpos(menu_data[m].position-2, i+2);
 
 		if (menu[m][i][0]=='-')		/* separator */
 		{
-			debug_hugoline[0] = HORIZONTAL_LEFT;
-			memset(debug_hugoline+1, HORIZONTAL_LINE, len+2);
-			sprintf(debug_hugoline+len+3, "%c", HORIZONTAL_RIGHT);
-			debug_print(debug_hugoline);
+			debug_line[0] = HORIZONTAL_LEFT;
+			memset(debug_line+1, HORIZONTAL_LINE, len+2);
+			sprintf(debug_line+len+3, "%c", HORIZONTAL_RIGHT);
+			debug_print(debug_line);
 			menu_shortcut_keys[i] = 0;
 		}
 		else
@@ -174,12 +174,12 @@ void DisplayMenu(int m, int selection)
 		}
 	}
 
-	/* Print bottom hugoline of menu */
+	/* Print bottom line of menu */
 	debug_settextpos(menu_data[m].position-2, 3+menu_data[m].items);
-	debug_hugoline[0] = BOTTOM_LEFT;
-	memset(debug_hugoline+1, HORIZONTAL_LINE, len+2);
-	sprintf(debug_hugoline+len+3, "%c", BOTTOM_RIGHT);
-	debug_print(debug_hugoline);
+	debug_line[0] = BOTTOM_LEFT;
+	memset(debug_line+1, HORIZONTAL_LINE, len+2);
+	sprintf(debug_line+len+3, "%c", BOTTOM_RIGHT);
+	debug_print(debug_line);
 }
 
 
@@ -530,22 +530,22 @@ OpenActiveMenuHeading:
 
 /* PRINTLINEANDCAPTION
 
-	Prints a horizontal hugoline with the specified caption centered in
+	Prints a horizontal line with the specified caption centered in
 	the middle.
 */
 
 void PrintLineandCaption(int row, char *a, int highlight)
 {
-	char *l;	/* since 'a' may be debug_hugoline */
+	char *l;	/* since 'a' may be debug_line */
 	l = strdup(a);
 	
 	debug_settextpos(2, row);
 
-	memset(debug_hugoline, HORIZONTAL_LINE, D_SCREENWIDTH/2-strlen(l)/2-1);
-	debug_hugoline[D_SCREENWIDTH/2-strlen(l)/2-1] = '\0';
+	memset(debug_line, HORIZONTAL_LINE, D_SCREENWIDTH/2-strlen(l)/2-1);
+	debug_line[D_SCREENWIDTH/2-strlen(l)/2-1] = '\0';
 	debug_settextcolor(color[NORMAL_TEXT]);
 	debug_setbackcolor(color[NORMAL_BACK]);
-	debug_print(debug_hugoline);
+	debug_print(debug_line);
 
 	if (highlight)
 	{
@@ -554,11 +554,11 @@ void PrintLineandCaption(int row, char *a, int highlight)
 	}
 	debug_print(l);
 
-	memset(debug_hugoline, HORIZONTAL_LINE, D_SCREENWIDTH/2-strlen(l)/2-1);
-	debug_hugoline[D_SCREENWIDTH/2-strlen(l)/2-1-strlen(l)%2] = '\0';
+	memset(debug_line, HORIZONTAL_LINE, D_SCREENWIDTH/2-strlen(l)/2-1);
+	debug_line[D_SCREENWIDTH/2-strlen(l)/2-1-strlen(l)%2] = '\0';
 	debug_settextcolor(color[NORMAL_TEXT]);
 	debug_setbackcolor(color[NORMAL_BACK]);
-	debug_print(debug_hugoline);
+	debug_print(debug_line);
 	
 	free(l);
 }
@@ -589,10 +589,10 @@ void PrintMenubar(void)
 /* If USE_OTHER_MENUS is #defined, "Press ALT [or whatever] for menu"
    isn't printed
 */
-	sprintf(debug_hugoline, "Hugo Debugger v%d.%d%s", HEVERSION, HEREVISION, HEINTERIM);
-	while (pos++ <= D_SCREENWIDTH-strlen(debug_hugoline)-1) debug_print(" ");
-	debug_print(debug_hugoline);
-	pos+=strlen(debug_hugoline)-1;
+	sprintf(debug_line, "Hugo Debugger v%d.%d%s", HEVERSION, HEREVISION, HEINTERIM);
+	while (pos++ <= D_SCREENWIDTH-strlen(debug_line)-1) debug_print(" ");
+	debug_print(debug_line);
+	pos+=strlen(debug_line)-1;
 #endif
 	while (pos++ <= D_SCREENWIDTH) debug_print(" ");
 
@@ -670,43 +670,43 @@ void PrintScreenBorders(void)
 	debug_settextcolor(color[NORMAL_TEXT]);
 	debug_setbackcolor(color[NORMAL_BACK]);
 
-	/* print vertical hugolines */
-	sprintf(debug_hugoline, "%c", VERTICAL_LINE);
+	/* print vertical lines */
+	sprintf(debug_line, "%c", VERTICAL_LINE);
 	for (i=3; i<D_SCREENHEIGHT-1; i++)
 	{
 		if (i==D_SEPARATOR) continue;
 
 		debug_settextpos(1, i);
-		debug_print(debug_hugoline);
+		debug_print(debug_line);
 		debug_settextpos(D_SCREENWIDTH, i);
-		debug_print(debug_hugoline);
+		debug_print(debug_line);
 	}
 
 	/* print corners */
-	sprintf(debug_hugoline, "%c", TOP_LEFT);
+	sprintf(debug_line, "%c", TOP_LEFT);
 	debug_settextpos(1, 2);
-	debug_print(debug_hugoline);
-	sprintf(debug_hugoline, "%c", TOP_RIGHT);
+	debug_print(debug_line);
+	sprintf(debug_line, "%c", TOP_RIGHT);
 	debug_settextpos(D_SCREENWIDTH, 2);
-	debug_print(debug_hugoline);
-	sprintf(debug_hugoline, "%c", HORIZONTAL_LEFT);
+	debug_print(debug_line);
+	sprintf(debug_line, "%c", HORIZONTAL_LEFT);
 	debug_settextpos(1, D_SEPARATOR);
-	debug_print(debug_hugoline);
-	sprintf(debug_hugoline, "%c", HORIZONTAL_RIGHT);
+	debug_print(debug_line);
+	sprintf(debug_line, "%c", HORIZONTAL_RIGHT);
 	debug_settextpos(D_SCREENWIDTH, D_SEPARATOR);
-	debug_print(debug_hugoline);
-	sprintf(debug_hugoline, "%c", BOTTOM_LEFT);
+	debug_print(debug_line);
+	sprintf(debug_line, "%c", BOTTOM_LEFT);
 	debug_settextpos(1, D_SCREENHEIGHT-1);
-	debug_print(debug_hugoline);
-	sprintf(debug_hugoline, "%c", BOTTOM_RIGHT);
+	debug_print(debug_line);
+	sprintf(debug_line, "%c", BOTTOM_RIGHT);
 	debug_settextpos(D_SCREENWIDTH, D_SCREENHEIGHT-1);
-	debug_print(debug_hugoline);
+	debug_print(debug_line);
 
 	/* non-code window */
-	strcpy(debug_hugoline, menu[MENU_VIEW/0x10-1][active_view]);
+	strcpy(debug_line, menu[MENU_VIEW/0x10-1][active_view]);
 	if (active_view==VIEW_LOCALS)
 	{
-		strcat(debug_hugoline, " (as ");
+		strcat(debug_line, " (as ");
 		switch (local_view_type)
 		{
 			case VALUE_T:
@@ -726,23 +726,23 @@ void PrintScreenBorders(void)
 			default:
 				{a = "UNDEFINED)"; break;}
 		}
-		strcat(debug_hugoline, a);
+		strcat(debug_line, a);
 	}
-	for (i=0; i<(int)strlen(debug_hugoline); i++)
+	for (i=0; i<(int)strlen(debug_line); i++)
 	{
-		if (debug_hugoline[i]=='&')
+		if (debug_line[i]=='&')
 		{
-			for (j=i; j<(int)strlen(debug_hugoline); j++)
-				debug_hugoline[j] = debug_hugoline[j+1];
+			for (j=i; j<(int)strlen(debug_line); j++)
+				debug_line[j] = debug_line[j+1];
 			goto ErasedAmpersand;
 		}
 	}
 ErasedAmpersand:
-	PrintLineandCaption(2, debug_hugoline, (active_window!=CODE_WINDOW));
+	PrintLineandCaption(2, debug_line, (active_window!=CODE_WINDOW));
 
 	/* Code window */
-	sprintf(debug_hugoline, "Current:  %s", RoutineName(currentroutine));
-	PrintLineandCaption(D_SEPARATOR, debug_hugoline, (active_window==CODE_WINDOW));
+	sprintf(debug_line, "Current:  %s", RoutineName(currentroutine));
+	PrintLineandCaption(D_SEPARATOR, debug_line, (active_window==CODE_WINDOW));
 
 	/* bottom of Code window */
 	PrintLineandCaption(D_SCREENHEIGHT-1, "", 0);
@@ -762,8 +762,8 @@ void PrintSelectedLine(int m, int i, int highlight)
 	debug_settextcolor(color[MENU_TEXT]);
 	debug_setbackcolor(color[MENU_BACK]);
 
-	sprintf(debug_hugoline, "%c", VERTICAL_LINE);
-	debug_print(debug_hugoline);
+	sprintf(debug_line, "%c", VERTICAL_LINE);
+	debug_print(debug_line);
 
 	if (highlight)
 	{
@@ -776,14 +776,14 @@ void PrintSelectedLine(int m, int i, int highlight)
 	if (highlight) context_help = menu[m][i];
 
 	menu_shortcut_keys[i] = PrintMenuItem(menu[m][i], true, highlight);
-	memset(debug_hugoline, ' ', menu_data[m].longest-strlen(menu[m][i])+3);
-	debug_hugoline[menu_data[m].longest-strlen(menu[m][i])+2] = '\0';
-	debug_print(debug_hugoline);
+	memset(debug_line, ' ', menu_data[m].longest-strlen(menu[m][i])+3);
+	debug_line[menu_data[m].longest-strlen(menu[m][i])+2] = '\0';
+	debug_print(debug_line);
 
 	debug_settextcolor(color[MENU_TEXT]);
 	debug_setbackcolor(color[MENU_BACK]);
-	sprintf(debug_hugoline, "%c", VERTICAL_LINE);
-	debug_print(debug_hugoline);
+	sprintf(debug_line, "%c", VERTICAL_LINE);
+	debug_print(debug_line);
 }
 
 
@@ -822,7 +822,7 @@ int SelectBox(int n, int def)
 	/* height = title + 1 + caption + 2 + visible choices + 1 */
 	height = 6 + visible;
 
-	/* Make space for the "Sample Text" hugoline, if this is a
+	/* Make space for the "Sample Text" line, if this is a
 	   color selection box
 	*/
 	if (selecting_color) height+=2;
@@ -840,11 +840,11 @@ int SelectBox(int n, int def)
 	DrawBox(y, y+height+1, x, x+width+1, color[MENU_TEXT], color[MENU_BACK]);
 
 	/* Draw separator */
-	debug_hugoline[0] = HORIZONTAL_LEFT;
-	memset(debug_hugoline+1, HORIZONTAL_LINE, width);
-	sprintf(debug_hugoline+width+1, "%c", HORIZONTAL_RIGHT);
+	debug_line[0] = HORIZONTAL_LEFT;
+	memset(debug_line+1, HORIZONTAL_LINE, width);
+	sprintf(debug_line+width+1, "%c", HORIZONTAL_RIGHT);
 	debug_settextpos(x, y+4);
-	debug_print(debug_hugoline);
+	debug_print(debug_line);
 
 	debug_settextpos(x+2, y+3);
 	debug_print("Select:");
@@ -878,11 +878,11 @@ PrintChoices:
 		if (first+i > n) a = "";
 		else a = choice[first+i];
 
-		/* create hugoline padded w/spaces */
-		memset(debug_hugoline, ' ', width);
-		debug_hugoline[width] = '\0';
-                sprintf(debug_hugoline, " %s", a);
-		debug_hugoline[strlen(debug_hugoline)] = ' ';
+		/* create line padded w/spaces */
+		memset(debug_line, ' ', width);
+		debug_line[width] = '\0';
+                sprintf(debug_line, " %s", a);
+		debug_line[strlen(debug_line)] = ' ';
 
 		if (this==first+i)
 		{
@@ -895,7 +895,7 @@ PrintChoices:
 			debug_setbackcolor(color[MENU_BACK]);
 		}
 		debug_settextpos(x+1, y+6+i);
-		debug_print(debug_hugoline);
+		debug_print(debug_line);
 	}
 
 	/* endless loop */
@@ -1006,14 +1006,14 @@ ReturnChoice:
 }
 
 
-int saved_currenthugoline = 0;
+int saved_currentline = 0;
 
 
 /* SWITCHTODEBUGGER */
 
 void SwitchtoDebugger(void)
 {
-	saved_currenthugoline = currenthugoline;
+	saved_currentline = currentline;
 
 	debug_switchscreen(DEBUGGER);
 	active_screen = DEBUGGER;
@@ -1030,7 +1030,7 @@ void SwitchtoDebugger(void)
 
 void SwitchtoGame(void)
 {
-	currenthugoline = saved_currenthugoline;
+	currentline = saved_currentline;
 
 	HighlightCurrent(0);
 	debug_switchscreen(GAME);

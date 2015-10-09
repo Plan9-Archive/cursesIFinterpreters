@@ -83,7 +83,7 @@ void DisplayPicture(void)
 	}
 
 	/* If filename is empty, no resource file was specified and
-	   the hugoline[] array simply holds the path of the file to be loaded
+	   the line[] array simply holds the path of the file to be loaded
 	   as a resource
 	*/
 	if (!(reslength = FindResource(filename, resname)))
@@ -440,8 +440,8 @@ ResfileError:
 
 #if defined (DEBUGGER)
 	SwitchtoDebugger();
-	sprintf(debug_hugoline, "Unable to find \"%s\" in \"%s\"", resname, filename);
-	DebugMessageBox("Resource Error", debug_hugoline);
+	sprintf(debug_line, "Unable to find \"%s\" in \"%s\"", resname, filename);
+	DebugMessageBox("Resource Error", debug_line);
 	SwitchtoGame();
 #endif
 	fclose(resource_file);

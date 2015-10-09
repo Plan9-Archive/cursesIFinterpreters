@@ -12,7 +12,6 @@
 
 /*-------------------------------------------------------------------------*/
 
-#define GCC_UNIX
 
 #if !defined (PROGRAM_NAME)
 #define PROGRAM_NAME 	"hd"
@@ -68,7 +67,7 @@ enum D_OBJECT_TYPE
 
 	/* START and FINISH are used to move to the very top or bottom,
 	   while HOME and END generally refer to the start and end of
-	   a hugoline, respectively.
+	   a line, respectively.
 	*/
 	START, FINISH, HOME, END
 };
@@ -86,11 +85,11 @@ struct event_structure
 
 struct window_structure
 {
-	unsigned int first;	/* first hugoline appearing in the window 	*/
-	unsigned int selected;	/* selected hugoline 			*/
-	unsigned int count;	/* total hugolines in (or out of) window	*/
-	unsigned int top;       /* where top hugoline is on the screen      */
-	unsigned int height;    /* maximum # of hugolines                   */
+	unsigned int first;	/* first line appearing in the window 	*/
+	unsigned int selected;	/* selected line 			*/
+	unsigned int count;	/* total lines in (or out of) window	*/
+	unsigned int top;       /* where top line is on the screen      */
+	unsigned int height;    /* maximum # of lines                   */
 	int width;              /* maximum # of characters              */
 	int horiz;              /* horizontal shift                     */
 	char changed;		/* true if window needs updating	*/
@@ -128,7 +127,7 @@ void debug_getinvocationpath(char *argv);
 void Debugger(void);
 void StartDebugger(void);
 
-extern char debug_hugoline[];
+extern char debug_line[];
 extern struct event_structure event;
 extern char debugger_run, debugger_interrupt, during_input,
 	debugger_collapsing;
@@ -156,8 +155,8 @@ void AddStringtoCodeWindow(char *a);
 void ShiftCodeLines(void);
 
 extern long this_codeptr, next_codeptr;
-extern int **codehugoline;
-extern int buffered_code_hugolines;
+extern int **codeline;
+extern int buffered_code_lines;
 
 
 /* hdmisc.c */
