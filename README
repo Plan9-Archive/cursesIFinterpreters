@@ -2,8 +2,8 @@ There are ports to plan 9 of interactive fiction interpreters which
 make use of a ported curses library.  This enables some games to be
 played which don't work right with frotz-dumb or cheapglk.
 
-As of the time of this upload (9/29/2015), building these successfully
-in 9front also requires latest updates to fix bugs in cmd/cpp and
-ape's libdraw. Precompiled binaries for x86 are availables at:
+The "buildall" script compiles and installs the necessary curses
+library and interpreters under the names cfrotz, cglulxe, and chugo.
+Precompiled binaries for x86 are availables at:
 
 http://files.9gridchan.org/fictools
