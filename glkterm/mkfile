@@ -1,4 +1,5 @@
 </sys/src/ape/config
+OS=0568qv
 all:
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c cgdate.c
 	pcc -D_POSIX_SOURCE -D_BSD_EXTENSION -D_PLAN9_SOURCE -c cgunicod.c
@@ -10,4 +11,4 @@ install:
 	cp libglkterm.a /$objtype/lib/ape
 clean:
 	rm *.a
-	rm *.$O
+	rm -f *.[$OS] [$OS].out y.tab.? lex.yy.c y.debug y.output $TARG $CLEANFILES
