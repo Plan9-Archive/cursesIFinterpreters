@@ -9,4 +9,4 @@ install:
 	cp cglulxe /$objtype/bin
 clean:
 	rm -f *.[$OS] [$OS].out y.tab.? lex.yy.c y.debug y.output $TARG $CLEANFILES
-	rm glulxe
+	rm cglulxe
